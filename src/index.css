@@ -1,0 +1,5 @@
+/* src/index.css */
+@import "tailwindcss";
+
+/* ── Dark mode: activate when <html> has class="dark" ── */
+@custom-variant dark (&:where(.dark, .dark *));
