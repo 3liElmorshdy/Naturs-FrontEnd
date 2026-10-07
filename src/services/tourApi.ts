@@ -1,5 +1,6 @@
 import api from './api.js';
 import type Tour from '../types/Tour.js';
+import { CreateTourPayload } from '../types/Tour.js';
 
 export interface ToursApiResponse {
   status: string;
@@ -18,3 +19,14 @@ export const getAllTours = async (params?: Record<string, unknown>): Promise<Tou
 export default getAllTours;
 
 
+
+
+
+export async function createTour(payload: CreateTourPayload) {
+  const response = await api.post<Tour>(
+    "/tours",
+    payload,
+  );
+
+  return response.data.data.data;
+}

@@ -19,6 +19,21 @@ export interface TourLocation {
   day: number;
 }
 
+export type CreateTourPayload = {
+  name: string;
+  slug?: string;
+  duration: number;
+  maxGroupSize: number;
+  difficulty: TourDifficulty;
+  guides: string[];
+  price: number;
+  summary: string;
+  description: string;
+  imageCover: string;
+  images: string[];
+  startDates: string[];
+};
+
 export default interface Tour {
   // MongoDB / Mongoose primary id
   _id: string;

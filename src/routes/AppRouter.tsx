@@ -27,7 +27,7 @@ import ConfirmEmailChange from "../pages/ConfirmEmailChange/ConfirmEmailChange";
 import AboutUs from "../pages/AboutUs/AboutUs";
 import { ContactUs } from "../pages/ContactUs/ContactUs";
 
-import AdminDashboard from "../pages/AdminDashboard/AdminDashboard";
+import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminUsers from "../pages/admin/AdminUsers";
 import ManageTours from "../pages/ManageTours/ManageTours";
 import MonthlyPlan from "../pages/MonthlyPlan/MonthlyPlan";

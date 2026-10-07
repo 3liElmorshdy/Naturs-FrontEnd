@@ -16,21 +16,9 @@ function ProtectedRoute({
 }: ProtectedRouteProps) {
   const location = useLocation();
 
-  const { user, isLoading } = useSelector(
+  const { user } = useSelector(
     (state: RootState) => state.auth,
   );
-
-  if (isLoading) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div
-          className="h-9 w-9 animate-spin rounded-full border-4 border-teal-600 border-t-transparent"
-          role="status"
-          aria-label="Loading"
-        />
-      </main>
-    );
-  }
 
   if (!user) {
     return (
