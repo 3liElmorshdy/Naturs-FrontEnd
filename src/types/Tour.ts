@@ -32,6 +32,12 @@ export type CreateTourPayload = {
   imageCover: string;
   images: string[];
   startDates: string[];
+  startLocation?: TourStartLocation;
+};
+export type StartLocation = {
+  type: "Point";
+  description: string;
+  coordinates: [number, number];
 };
 
 export default interface Tour {

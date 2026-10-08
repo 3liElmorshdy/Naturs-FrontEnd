@@ -22,11 +22,25 @@ export default getAllTours;
 
 
 
+interface CreateTourResponse {
+  status: string;
+  data: {
+    data: Tour;
+  };
+}
+
 export async function createTour(payload: CreateTourPayload) {
-  const response = await api.post<Tour>(
+  const response = await api.post<CreateTourResponse>(
     "/tours",
     payload,
   );
 
   return response.data.data.data;
+}
+
+
+
+
+export async function deleteTour(tourId: string) {
+  await api.delete(`/tours/${tourId}`);
 }

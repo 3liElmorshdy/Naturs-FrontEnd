@@ -6,12 +6,7 @@ import Unauthorized from "../components/Unauthorized/Unauthorized";
 
 import Layout from "../layout/Layout";
 
-
-import {
-  ADMIN_ROLES,
-  MONTHLY_PLAN_ROLES,
-  ROLES,
-} from "../constants/roles";
+import { ADMIN_ROLES, MONTHLY_PLAN_ROLES, ROLES } from "../constants/roles";
 
 import Home from "../pages/Home/Home";
 import Login from "../pages/Login/Login";
@@ -29,8 +24,8 @@ import { ContactUs } from "../pages/ContactUs/ContactUs";
 
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminUsers from "../pages/admin/AdminUsers";
-import ManageTours from "../pages/ManageTours/ManageTours";
-import MonthlyPlan from "../pages/MonthlyPlan/MonthlyPlan";
+import ManageTours from "../pages/admin/ManageTours/ManageTours";
+import MonthlyPlan from "../pages/admin/MonthlyPlan/MonthlyPlan";
 
 const router = createBrowserRouter([
   {
@@ -123,44 +118,40 @@ const router = createBrowserRouter([
         ),
       },
 
-
+      {
+        path: "admin",
+        element: (
+          <ProtectedRoute allowedRoles={ADMIN_ROLES}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        ),
+      },
 
       {
-  path: "admin",
-  element: (
-    <ProtectedRoute allowedRoles={ADMIN_ROLES}>
-      <AdminDashboard />
-    </ProtectedRoute>
-  ),
-},
+        path: "admin/users",
+        element: (
+          <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+            <AdminUsers />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "manage-tours",
+        element: (
+          <ProtectedRoute allowedRoles={ADMIN_ROLES}>
+            <ManageTours />
+          </ProtectedRoute>
+        ),
+      },
 
-{
-  path: "admin/users",
-  element: (
-    <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-      <AdminUsers />
-    </ProtectedRoute>
-  ),
-},
-{
-  path: "manage-tours",
-  element: (
-    <ProtectedRoute allowedRoles={ADMIN_ROLES}>
-      <ManageTours />
-    </ProtectedRoute>
-  ),
-},
-
-
-
-{
-  path: "monthly-plan",
-  element: (
-    <ProtectedRoute allowedRoles={MONTHLY_PLAN_ROLES}>
-      <MonthlyPlan />
-    </ProtectedRoute>
-  ),
-},
+      {
+        path: "monthly-plan",
+        element: (
+          <ProtectedRoute allowedRoles={MONTHLY_PLAN_ROLES}>
+            <MonthlyPlan />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 ]);
