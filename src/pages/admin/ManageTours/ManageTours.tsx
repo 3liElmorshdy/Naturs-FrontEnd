@@ -28,6 +28,9 @@ import type Tour from "../../../types/Tour";
 import type { CreateTourPayload, StartLocation } from "../../../types/Tour";
 import type User from "../../../types/User";
 import { getRequestErrorMessage } from "../../../utils/requestError";
+import { ImageDropZone } from "./ImageDropZone";
+
+const MAX_GALLERY_IMAGES = 3;
 
 type TourFormState = {
   name: string;
@@ -114,6 +117,31 @@ function ManageTours() {
   const [createdTourSlug, setCreatedTourSlug] = useState("");
 
   const [tourToDelete, setTourToDelete] = useState<Tour | null>(null);
+
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+
+  const coverPreview = useMemo(
+    () => (coverFile ? URL.createObjectURL(coverFile) : ""),
+    [coverFile],
+  );
+
+  const galleryPreviews = useMemo(
+    () => galleryFiles.map((file) => URL.createObjectURL(file)),
+    [galleryFiles],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (coverPreview) URL.revokeObjectURL(coverPreview);
+    };
+  }, [coverPreview]);
+
+  useEffect(() => {
+    return () => {
+      galleryPreviews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [galleryPreviews]);
 
   const canManageTours =
     currentUser?.role === "admin" || currentUser?.role === "lead-guide";
@@ -300,47 +328,52 @@ function ManageTours() {
     setSuccessMessage("");
   }
 
-  function updateImage(index: number, value: string) {
-    setForm((currentForm) => {
-      const images = [...currentForm.images];
+  /*
+    الصور تُحفظ كـ File منفصلة، ونخزّن أسماءها داخل form
+    حتى يستمر الـ zod schema والـ progress في العمل كما هو.
+  */
+  function reportImageError(field: "imageCover" | "images", message: string) {
+    setFieldErrors((currentErrors) => ({
+      ...currentErrors,
+      [field]: message,
+    }));
+  }
 
-      images[index] = value;
+  function handleCoverSelected(files: File[]) {
+    const file = files[0];
+    if (!file) return;
 
-      const nextForm = {
-        ...currentForm,
-        images,
-      };
-
-      if (hasSubmitted) {
-        validateField("images", nextForm);
-      }
-
-      return nextForm;
-    });
-
+    setCoverFile(file);
+    setForm((currentForm) => ({ ...currentForm, imageCover: file.name }));
+    clearFieldError("imageCover");
     setErrorMessage("");
   }
 
-  function addImage() {
-    setForm((currentForm) => ({
-      ...currentForm,
-      images: [...currentForm.images, ""],
-    }));
-
-    clearFieldError("images");
+  function removeCover() {
+    setCoverFile(null);
+    setForm((currentForm) => ({ ...currentForm, imageCover: "" }));
   }
 
-  function removeImage(index: number) {
-    if (form.images.length === 1) {
-      return;
-    }
-
+  function syncGalleryFiles(nextFiles: File[]) {
+    setGalleryFiles(nextFiles);
     setForm((currentForm) => ({
       ...currentForm,
-      images: currentForm.images.filter(
-        (_, imageIndex) => imageIndex !== index,
-      ),
+      images: nextFiles.length ? nextFiles.map((file) => file.name) : [""],
     }));
+  }
+
+  function handleGallerySelected(files: File[]) {
+    syncGalleryFiles(
+      [...galleryFiles, ...files].slice(0, MAX_GALLERY_IMAGES),
+    );
+    clearFieldError("images");
+    setErrorMessage("");
+  }
+
+  function removeGalleryFile(index: number) {
+    syncGalleryFiles(
+      galleryFiles.filter((_, fileIndex) => fileIndex !== index),
+    );
   }
 
   function updateStartDate(index: number, value: string) {
@@ -431,6 +464,8 @@ function ManageTours() {
 
   function resetForm() {
     setForm(initialForm);
+    setCoverFile(null);
+    setGalleryFiles([]);
     setSuccessMessage("");
     setErrorMessage("");
     setFieldErrors({});
@@ -534,7 +569,16 @@ function ManageTours() {
 
     const values: TourFormValues = result.data;
 
-const payload: CreateTourPayload = {
+    if (!coverFile) {
+      reportImageError("imageCover", "Cover image is required.");
+      setErrorMessage(
+        "Please review the highlighted fields before creating the tour.",
+      );
+      setIsSubmitting(false);
+      return;
+    }
+
+const payload: Omit<CreateTourPayload, "imageCover" | "images"> = {
   name: values.name,
   slug: values.slug || slugify(values.name),
   duration: Number(values.duration),
@@ -543,11 +587,6 @@ const payload: CreateTourPayload = {
   price: Number(values.price),
   summary: values.summary,
   description: values.description,
-  imageCover: values.imageCover,
-
-  images: values.images
-    .map((image) => image.trim())
-    .filter(Boolean),
 
   startDates: values.startDates
     .filter(Boolean)
@@ -566,7 +605,10 @@ const payload: CreateTourPayload = {
   
 };
     try {
-      const createdTour = await createTour(payload);
+      const createdTour = await createTour(payload, {
+        imageCover: coverFile,
+        images: galleryFiles,
+      });
 
       setTours((currentTours) => [createdTour, ...currentTours]);
 
@@ -576,6 +618,8 @@ const payload: CreateTourPayload = {
 
       setCreatedTourSlug(payload.slug || "");
       setForm(initialForm);
+      setCoverFile(null);
+      setGalleryFiles([]);
       setFieldErrors({});
       setHasSubmitted(false);
 
@@ -1045,30 +1089,52 @@ const payload: CreateTourPayload = {
                 </h2>
 
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  Provide image filenames expected by the backend.
+                  Upload the cover and gallery images for this tour.
                 </p>
               </div>
             </div>
 
-            <div className="space-y-6">
-              <label className="block">
+            <div className="space-y-8">
+              <div>
                 <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
                   Cover Image
                 </span>
 
-                <input
-                  type="text"
-                  value={form.imageCover}
-                  onChange={(event) =>
-                    updateField("imageCover", event.target.value)
-                  }
-                  onBlur={() => validateField("imageCover", form)}
-                  placeholder="tour-mansoura-cover.jpg"
-                  className={inputClassName(Boolean(fieldErrors.imageCover))}
-                />
+                <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                  {coverPreview && (
+                    <div className="group relative aspect-video overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
+                      <img
+                        src={coverPreview}
+                        alt="Cover preview"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={removeCover}
+                        aria-label="Remove cover image"
+                        title="Remove cover image"
+                        className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-slate-900/70 text-white backdrop-blur transition-colors hover:bg-rose-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  <div className={coverPreview ? "" : "sm:col-span-2"}>
+                    <ImageDropZone
+                      id="tour-cover-image"
+                      hasError={Boolean(fieldErrors.imageCover)}
+                      onFiles={handleCoverSelected}
+                      onError={(message) =>
+                        reportImageError("imageCover", message)
+                      }
+                    />
+                  </div>
+                </div>
 
                 {renderFieldError("imageCover")}
-              </label>
+              </div>
 
               <div>
                 <div className="flex items-center justify-between gap-3">
@@ -1076,49 +1142,64 @@ const payload: CreateTourPayload = {
                     Gallery Images
                   </span>
 
-                  <button
-                    type="button"
-                    onClick={addImage}
-                    className="group flex items-center gap-2 rounded-lg bg-teal-50 px-3 py-1.5 text-sm font-semibold text-teal-700 transition-colors hover:bg-teal-100 hover:text-teal-800 dark:bg-teal-500/10 dark:text-teal-300 dark:hover:bg-teal-500/20"
-                  >
-                    <Plus className="h-4 w-4 transition-transform group-hover:scale-110" />
-                    Add Image
-                  </button>
+                  <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">
+                    {galleryFiles.length}/{MAX_GALLERY_IMAGES}
+                  </span>
                 </div>
 
-                <div className="mt-4 space-y-3">
-                  {form.images.map((image, index) => (
-                    <div key={index} className="flex gap-3">
-                      <input
-                        type="text"
-                        value={image}
-                        onChange={(event) =>
-                          updateImage(index, event.target.value)
-                        }
-                        onBlur={() => validateField("images", form)}
-                        placeholder={`tour-mansoura-${index + 1}.jpg`}
-                        className={inputClassName(
-                          Boolean(fieldErrors.images),
-                        )}
-                      />
-
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        disabled={form.images.length === 1}
-                        title={
-                          form.images.length === 1
-                            ? "At least one gallery image is required"
-                            : `Remove image ${index + 1}`
-                        }
-                        className="mt-2 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 transition-all hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-35 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-rose-500/30 dark:hover:bg-rose-500/10 dark:hover:text-rose-400"
-                        aria-label={`Remove image ${index + 1}`}
+                {galleryFiles.length === 0 ? (
+                  <div className="mt-3">
+                    <ImageDropZone
+                      id="tour-gallery-images"
+                      multiple
+                      maxFiles={MAX_GALLERY_IMAGES}
+                      hasError={Boolean(fieldErrors.images)}
+                      onFiles={handleGallerySelected}
+                      onError={(message) =>
+                        reportImageError("images", message)
+                      }
+                    />
+                  </div>
+                ) : (
+                  <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                    {galleryPreviews.map((preview, index) => (
+                      <div
+                        key={`${galleryFiles[index]?.name ?? "image"}-${index}`}
+                        className="group relative aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800"
                       >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                        <img
+                          src={preview}
+                          alt={`Gallery image ${index + 1}`}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => removeGalleryFile(index)}
+                          aria-label={`Remove image ${index + 1}`}
+                          title={`Remove image ${index + 1}`}
+                          className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-slate-900/70 text-white backdrop-blur transition-colors hover:bg-rose-600"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+
+                    {galleryFiles.length < MAX_GALLERY_IMAGES && (
+                      <ImageDropZone
+                        id="tour-gallery-images"
+                        multiple
+                        variant="tile"
+                        maxFiles={MAX_GALLERY_IMAGES - galleryFiles.length}
+                        hasError={Boolean(fieldErrors.images)}
+                        onFiles={handleGallerySelected}
+                        onError={(message) =>
+                          reportImageError("images", message)
+                        }
+                      />
+                    )}
+                  </div>
+                )}
 
                 {renderFieldError("images")}
 

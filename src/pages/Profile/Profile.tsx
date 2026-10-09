@@ -12,6 +12,7 @@ import {
   checkEmailAvailability,
   updateEmail,
   updateMe,
+  uploadPhoto,
 } from "../../services/users";
 
 import {
@@ -77,6 +78,28 @@ function Profile() {
     );
   }
 
+
+  async function handleImageChange(file: File) {
+    resetMessages();
+
+    if (!file.type.startsWith("image/")) {
+      setErrorMessage("Please choose an image file.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage("Image must be smaller than 5MB.");
+      return;
+    }
+
+    try {
+      const updatedUser = await uploadPhoto(file);
+      dispatch(updateUser(updatedUser));
+      setMessage("Profile photo updated successfully.");
+    } catch (error) {
+      setErrorMessage(getRequestErrorMessage(error));
+    }
+  }
 
   function handleEdit() {
     resetMessages();
@@ -241,7 +264,10 @@ function handleClosePasswordModal() {
         </header>
 
         <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <ProfileSidebar user={user} />
+          <ProfileSidebar
+            user={user}
+            onImageChange={handleImageChange}
+          />
 
           <ProfileForm
             initialValues={initialValues}

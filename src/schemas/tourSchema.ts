@@ -159,5 +159,5 @@ export const tourFormSchema = z.object({
 });
 
 export type TourFormValues = z.infer<
-  typeof tourFormSchema
+  typeof tourFormSchema 
 >;

@@ -34,6 +34,20 @@ export async function updateMe(
 
   return response.data.data.user;
 }
+
+export async function uploadPhoto(file: File): Promise<User> {
+  const formData = new FormData();
+  formData.append("photo", file);
+
+  const response = await api.patch<UserResponse>(
+    "/users/updateMe",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+
+  return response.data.data.user;
+}
+
 export async function updateEmail(payload: {
   currentPassword: string;
   email: string;
