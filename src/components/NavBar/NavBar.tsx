@@ -176,7 +176,7 @@ function NavBar() {
 
               {user && (
                 <NavLink
-                  to="/bookings"
+                  to="/my-bookings"
                   className={({ isActive }) =>
                     desktopLinkClassName(isActive)
                   }

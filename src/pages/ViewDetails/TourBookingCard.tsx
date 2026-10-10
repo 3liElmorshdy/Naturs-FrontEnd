@@ -2,6 +2,11 @@ import { Avatar } from "../../components/Avatar/Avatar";
 import type Tour from "../../types/Tour";
 import type User from "../../types/User";
 import { formatMonth } from "../../utils/viewDetails";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import type { RootState } from "../../store/store";
+import api from "../../services/api";
 
 interface TourBookingCardProps {
   tour: Tour;
@@ -14,6 +19,29 @@ export function TourBookingCard({
   upcomingDates,
   guides,
 }: TourBookingCardProps) {
+  const [booking, setBooking] = useState(false);
+  const navigate = useNavigate();
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  const handleBooking = async () => {
+    if (!user) {
+      return navigate("/login");
+    }
+    
+    try {
+      setBooking(true);
+      const res = await api.get(`/bookings/checkout-session/${tour._id}`);
+      
+      if (res.data?.session?.url) {
+        window.location.href = res.data.session.url;
+      }
+    } catch (err: any) {
+      console.error("Booking error:", err.response?.data || err.message);
+      alert("Error: " + (err.response?.data?.message || err.message));
+      setBooking(false);
+    }
+  };
+
   return (
     <aside className="lg:sticky lg:top-24 lg:self-start">
       <div className="space-y-5 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700">
@@ -73,12 +101,16 @@ export function TourBookingCard({
         )}
 
         <button
+          onClick={handleBooking}
+          disabled={booking || upcomingDates.length === 0}
           type="button"
-          className="w-full rounded-xl bg-teal-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
+          className="w-full rounded-xl bg-teal-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {upcomingDates.length > 0
-            ? "Book this tour"
-            : "Check availability"}
+          {booking
+            ? "Processing..."
+            : upcomingDates.length > 0
+              ? "Book this tour"
+              : "Check availability"}
         </button>
       </div>
     </aside>

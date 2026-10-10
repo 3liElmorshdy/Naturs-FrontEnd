@@ -100,8 +100,17 @@ const router = createBrowserRouter([
         element: <AboutUs />,
       },
 
+      // {
+      //   path: "bookings",
+      //   element: (
+      //     <ProtectedRoute>
+      //       <MyBooking />
+      //     </ProtectedRoute>
+      //   ),
+      // },
+
       {
-        path: "bookings",
+        path: "my-bookings",
         element: (
           <ProtectedRoute>
             <MyBooking />

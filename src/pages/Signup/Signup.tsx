@@ -40,13 +40,15 @@ const Signup: React.FC = () => {
             </div>
 
             <h2 className="font-bold text-2xl text-slate-800 dark:text-white mb-3">
-           Your account has been created successfully 🎉
+           Your account has been created successfully
             </h2>
 
             <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs">
              We sent you a verification link to {" "}
-              <span className="font-semibold text-teal-600 dark:text-teal-400 break-all">
+             <br />
+              <span className="font-semibold text-teal-600 dark:text-teal-400 break-all  underline underline-offset-4">
                 {registeredEmail}
+                 <br />
 
               </span>
               . Please click on it to be able to log in.
