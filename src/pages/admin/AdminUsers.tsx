@@ -30,7 +30,7 @@ import { getRequestErrorMessage } from "../../utils/requestError";
 const USERS_PER_PAGE = 8;
 
 const USER_IMAGES_BASE_URL =
-  "http://localhost:5020/img/users/";
+  "https://naturs.onrender.com/img/users/";
 
 function getInitial(name: string) {
   return name.trim().charAt(0).toUpperCase() || "U";

@@ -25,7 +25,7 @@ export function formatDate(value?: string | Date) {
 
 const API_ORIGIN =
   import.meta.env.VITE_API_ORIGIN ??
-  "http://localhost:5020";
+  "https://naturs.onrender.com";
 
 export function getUserPhotoUrl(
   photo?: string | null,

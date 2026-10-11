@@ -8,7 +8,7 @@ import { logoutUser } from "../store/authSlice";
 
 const BASE_URL =
   import.meta.env.VITE_API_URL ||
-  "http://localhost:5020/api/v1";
+  "https://naturs.onrender.com/api/v1";
 
 // الـ access token في الذاكرة فقط، وليس في localStorage.
 let accessToken: string | null = null;

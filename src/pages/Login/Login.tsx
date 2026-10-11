@@ -116,7 +116,7 @@ const Login: React.FC = () => {
             className="w-full mt-6 flex justify-center items-center bg-transparent border-slate-300 dark:border-slate-60
        0"
             onClick={() => {
-window.location.href = 'http://localhost:5020/api/v1/users/auth/google';            }}
+window.location.href = 'https://naturs.onrender.com/api/v1/users/auth/google';            }}
           >
             <GoogleIcon />
             <span className="ml-3">Login with Google</span>

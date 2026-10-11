@@ -19,7 +19,7 @@ const Signup: React.FC = () => {
   } = useSignup();
 
   const handelgoogleSignUp = () => {
-    window.location.href = 'http://localhost:5020/api/v1/users/auth/google';
+    window.location.href = 'https://naturs.onrender.com/api/v1/users/auth/google';
   };
 
   return (

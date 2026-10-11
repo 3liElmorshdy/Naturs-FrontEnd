@@ -10,7 +10,7 @@ import { useLogout } from "../../hooks/auth/useLogout";
 import type { RootState } from "../../store/store";
 import type User from "../../types/User";
 
-const IMG_BASE = "http://localhost:5020/img/users/";
+const IMG_BASE = "https://naturs.onrender.com/img/users/";
 
 type UserAvatarProps = {
   user: User;

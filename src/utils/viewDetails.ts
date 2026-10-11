@@ -1,4 +1,4 @@
-export const API_URL = "http://localhost:5020";
+export const API_URL = "https://naturs.onrender.com";
 
 export const TOUR_IMG = `${API_URL}/img/tours/`;
 export const USER_IMG = `${API_URL}/img/users/`;
