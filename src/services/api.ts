@@ -7,8 +7,7 @@ import { store } from "../store/store";
 import { logoutUser } from "../store/authSlice";
 import { API_BASE_URL } from "../config";
 
-const BASE_URL =
-  import.meta.env.VITE_API_URL || API_BASE_URL;
+const BASE_URL = API_BASE_URL;
 
 // الـ access token في الذاكرة فقط، وليس في localStorage.
 let accessToken: string | null = null;

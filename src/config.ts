@@ -1,8 +1,4 @@
-// إذا كان VITE_API_ORIGIN غير محدد أو فارغ، نستخدم الرابط النسبي عبر Vercel Rewrite
-export const API_ORIGIN: string =
-  (import.meta.env.VITE_API_ORIGIN as string | undefined) || "";
-
-export const API_BASE_URL = API_ORIGIN
-  ? `${API_ORIGIN}/api/v1`
-  : "/api/v1";
+// نستخدم المسار النسبي دائماً عبر Vercel Rewrite في الإنتاج وعبر Vite Proxy في التطوير المحلي
+export const API_ORIGIN = "";
+export const API_BASE_URL = "/api/v1";
 
