@@ -32,8 +32,27 @@ const refreshClient = axios.create({
 });
 
 // يضيف Bearer token لكل request محمي.
-api.interceptors.request.use((config) => {
-  if (accessToken) {
+// إذا كان المستخدم مسجل دخول ولكن الـ accessToken لم يُحمَّل بعد (عند عمل refresh)، ننتظر جلبه أولاً لمنع حدوث 401 المبدئي.
+api.interceptors.request.use(async (config) => {
+  const url = config.url ?? "";
+  const isAuthRoute =
+    url.includes("/users/login") ||
+    url.includes("/users/signup") ||
+    url.includes("/users/refreshAccessToken");
+
+  if (
+    !accessToken &&
+    !isAuthRoute &&
+    typeof window !== "undefined" &&
+    localStorage.getItem("user")
+  ) {
+    try {
+      const token = await refreshAccessToken();
+      config.headers.Authorization = `Bearer ${token}`;
+    } catch {
+      // لو فشل الـ refresh يكمل الطلب للـ response interceptor
+    }
+  } else if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
 
