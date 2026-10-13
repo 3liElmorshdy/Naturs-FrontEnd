@@ -18,6 +18,7 @@ import {
 } from "../../services/bookingApi";
 import type { RootState } from "../../store/store";
 import { getRequestErrorMessage } from "../../utils/requestError";
+import { API_ORIGIN } from "../../config";
 
 function formatDate(value?: string) {
   if (!value) {
@@ -47,14 +48,14 @@ function formatCurrency(value: number) {
 
 function getTourImage(imageCover?: string) {
   if (!imageCover) {
-    return "/img/tours/tour-1-cover.jpg";
+    return `${API_ORIGIN}/img/tours/tour-1-cover.jpg`;
   }
 
   if (imageCover.startsWith("http")) {
     return imageCover;
   }
 
-  return `/img/tours/${imageCover}`;
+  return `${API_ORIGIN}/img/tours/${imageCover}`;
 }
 
 function MyBookings() {
