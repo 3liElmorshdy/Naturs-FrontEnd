@@ -1,3 +1,4 @@
+import { API_ORIGIN } from "../../config";
 import { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
@@ -29,8 +30,7 @@ import { getRequestErrorMessage } from "../../utils/requestError";
 
 const USERS_PER_PAGE = 8;
 
-const USER_IMAGES_BASE_URL =
-  "https://naturs.onrender.com/img/users/";
+const USER_IMAGES_BASE_URL = `${API_ORIGIN}/img/users/`;
 
 function getInitial(name: string) {
   return name.trim().charAt(0).toUpperCase() || "U";

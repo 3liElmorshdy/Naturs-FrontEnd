@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import type Tour from "../../types/Tour";
 import { formatDistance } from "../../utils/formatDistance";
 import type { DistanceUnit } from "../../utils/formatDistance";
-const API_URL = "https://naturs.onrender.com";
+import { API_ORIGIN as API_URL } from "../../config";
 const TOURS_IMAGE_BASE = `${API_URL}/img/tours/`;
 interface TourCardProps {
   tour: Tour;

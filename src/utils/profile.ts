@@ -1,3 +1,4 @@
+import { API_ORIGIN } from "../config";
 export function getInitials(name: string) {
   return name
     .trim()
@@ -23,9 +24,6 @@ export function formatDate(value?: string | Date) {
   }).format(date);
 }
 
-const API_ORIGIN =
-  import.meta.env.VITE_API_ORIGIN ??
-  "https://naturs.onrender.com";
 
 export function getUserPhotoUrl(
   photo?: string | null,

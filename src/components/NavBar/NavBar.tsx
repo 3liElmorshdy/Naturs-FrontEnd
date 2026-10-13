@@ -1,3 +1,4 @@
+import { API_ORIGIN } from "../../config";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
@@ -10,7 +11,7 @@ import { useLogout } from "../../hooks/auth/useLogout";
 import type { RootState } from "../../store/store";
 import type User from "../../types/User";
 
-const IMG_BASE = "https://naturs.onrender.com/img/users/";
+const IMG_BASE = `${API_ORIGIN}/img/users/`;
 
 type UserAvatarProps = {
   user: User;

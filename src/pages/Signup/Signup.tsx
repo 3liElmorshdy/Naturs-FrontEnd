@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../config";
 import React from "react";
 import { Eye, EyeOff, Mail } from "lucide-react";
 import Button from "../../components/Button/Buttons";
@@ -19,7 +20,7 @@ const Signup: React.FC = () => {
   } = useSignup();
 
   const handelgoogleSignUp = () => {
-    window.location.href = 'https://naturs.onrender.com/api/v1/users/auth/google';
+    window.location.href = `${API_BASE_URL}/users/auth/google`;
   };
 
   return (

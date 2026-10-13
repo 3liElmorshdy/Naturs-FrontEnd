@@ -1,4 +1,5 @@
-export const API_URL = "https://naturs.onrender.com";
+import { API_ORIGIN } from "../config";
+export const API_URL = API_ORIGIN;
 
 export const TOUR_IMG = `${API_URL}/img/tours/`;
 export const USER_IMG = `${API_URL}/img/users/`;
