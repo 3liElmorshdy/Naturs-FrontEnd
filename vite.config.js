@@ -4,6 +4,17 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react() , tailwindcss()]
-      
+  plugins: [react(), tailwindcss()],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://naturs-1.onrender.com',
+        changeOrigin: true,
+      },
+      '/img': {
+        target: 'https://naturs-1.onrender.com',
+        changeOrigin: true,
+      },
+    },
+  },
 })

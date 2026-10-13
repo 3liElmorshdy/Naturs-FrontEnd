@@ -1,9 +1,16 @@
 {
-    "$schema": "https://openapi.vercel.sh/vercel.json",
-    "rewrites": [
-        {
-            "source": "/(.*)",
-            "destination": "/index.html"
-        }
-    ]
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://naturs-1.onrender.com/api/:path*"
+    },
+    {
+      "source": "/img/:path*",
+      "destination": "https://naturs-1.onrender.com/img/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
