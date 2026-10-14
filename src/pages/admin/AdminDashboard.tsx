@@ -154,7 +154,10 @@ function AdminDashboard() {
             )}
 
             {isCurrentUserAdmin && (
-              <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+              <Link
+                to="/bookings"
+                className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-amber-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-amber-500/50 dark:focus-visible:ring-offset-slate-900"
+              >
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
                   <CalendarDays className="h-6 w-6" />
                 </div>
@@ -164,14 +167,14 @@ function AdminDashboard() {
                 </h3>
 
                 <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  Booking management can be added here when your booking API
-                  endpoints are ready.
+                  Manage customer bookings, view schedules, and track reservations.
                 </p>
 
-                <span className="mt-5 inline-flex text-sm font-semibold text-slate-400 dark:text-slate-500">
-                  Coming soon
+                <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-amber-700 transition-colors dark:text-amber-300">
+                  Manage bookings
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </span>
-              </article>
+              </Link>
             )}
           </div>
         </section>
