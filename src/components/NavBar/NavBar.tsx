@@ -49,9 +49,13 @@ function UserAvatar({
     );
   }
 
+  const photoUrl = user.photo.startsWith("http")
+    ? user.photo
+    : `${IMG_BASE}${user.photo}`;
+
   return (
     <img
-      src={`${IMG_BASE}${user.photo}`}
+      src={photoUrl}
       alt={user.name}
       className={`${sizeClassName} shrink-0 rounded-full object-cover ring-2 ring-teal-400 ring-offset-1 dark:ring-offset-slate-800`}
       onError={(event) => {

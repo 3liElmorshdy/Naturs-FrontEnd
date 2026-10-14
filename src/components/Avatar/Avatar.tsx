@@ -37,9 +37,13 @@ export function Avatar({
     );
   }
 
+  const photoUrl = photo.startsWith("http")
+    ? photo
+    : `${USER_IMG}${photo}`;
+
   return (
     <img
-      src={`${USER_IMG}${photo}`}
+      src={photoUrl}
       alt={name}
       className={`shrink-0 rounded-full object-cover ${sizeClass}`}
       onError={(event) => {

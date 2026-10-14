@@ -115,9 +115,13 @@ function UserAvatar({
     user.photo && user.photo !== "default.jpg";
 
   if (hasPhoto) {
+    const photoUrl = user.photo!.startsWith("http")
+      ? user.photo!
+      : `${USER_IMAGES_BASE_URL}${user.photo}`;
+
     return (
       <img
-        src={`${USER_IMAGES_BASE_URL}${user.photo}`}
+        src={photoUrl}
         alt={user.name}
         className={`${avatarClassName} shrink-0 rounded-full object-cover`}
         onError={(event) => {
