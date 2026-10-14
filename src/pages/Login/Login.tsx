@@ -153,7 +153,9 @@ const Login: React.FC = () => {
             className="w-full mt-6 flex justify-center items-center bg-transparent border-slate-300 dark:border-slate-60
        0"
             onClick={() => {
-window.location.href = `${API_BASE_URL}/users/auth/google`;            }}
+              sessionStorage.setItem("google_auth_action", "login");
+              window.location.href = `${API_BASE_URL}/users/auth/google`;
+            }}
           >
             <GoogleIcon />
             <span className="ml-3">Login with Google</span>

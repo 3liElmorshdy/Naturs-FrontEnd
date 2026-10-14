@@ -20,6 +20,7 @@ const Signup: React.FC = () => {
   } = useSignup();
 
   const handelgoogleSignUp = () => {
+    sessionStorage.setItem("google_auth_action", "signup");
     window.location.href = `${API_BASE_URL}/users/auth/google`;
   };
 
