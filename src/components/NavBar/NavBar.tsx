@@ -190,16 +190,7 @@ function NavBar() {
                 </NavLink>
               )}
 
-              {canManageTours && (
-                <NavLink
-                  to="/manage-tours"
-                  className={({ isActive }) =>
-                    desktopLinkClassName(isActive)
-                  }
-                >
-                  Manage Tours
-                </NavLink>
-              )}
+    
 
               {canOpenDashboard && (
                 <NavLink
@@ -360,53 +351,9 @@ function NavBar() {
                           </NavLink>
                         )}
 
-                        {canManageTours && (
-                          <NavLink
-                            to="/manage-tours"
-                            onClick={closeMenus}
-                            className={dropdownLinkClassName()}
-                          >
-                            <svg
-                              className="h-4 w-4 text-teal-600 dark:text-teal-400"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={1.8}
-                              aria-hidden="true"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M3 6.75h18M6.75 3v3.75m10.5-3v3.75M6 10.5h12a1.5 1.5 0 011.5 1.5v6A1.5 1.5 0 0118 19.5H6A1.5 1.5 0 014.5 18v-6A1.5 1.5 0 016 10.5z"
-                              />
-                            </svg>
-                            Manage Tours
-                          </NavLink>
-                        )}
+               
 
-                        {canManageUsers && (
-                          <NavLink
-                            to="/admin/users"
-                            onClick={closeMenus}
-                            className={dropdownLinkClassName()}
-                          >
-                            <svg
-                              className="h-4 w-4 text-violet-600 dark:text-violet-400"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={1.8}
-                              aria-hidden="true"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M18 18.75a6 6 0 00-12 0m12 0a6 6 0 011.5.75m-1.5-.75H6m12 0v.75m-12-.75v.75m6-7.5a3 3 0 100-6 3 3 0 000 6z"
-                              />
-                            </svg>
-                            Manage Users
-                          </NavLink>
-                        )}
+               
                       </div>
                     )}
 
@@ -557,29 +504,9 @@ function NavBar() {
                   </li>
                 )}
 
-                {canManageTours && (
-                  <li>
-                    <NavLink
-                      to="/manage-tours"
-                      onClick={closeMenus}
-                      className="block py-3 text-sm font-semibold text-teal-700 dark:text-teal-400"
-                    >
-                      Manage Tours
-                    </NavLink>
-                  </li>
-                )}
+   
 
-                {canManageUsers && (
-                  <li>
-                    <NavLink
-                      to="/admin/users"
-                      onClick={closeMenus}
-                      className="block py-3 text-sm font-semibold text-violet-700 dark:text-violet-400"
-                    >
-                      Manage Users
-                    </NavLink>
-                  </li>
-                )}
+        
 
                 <li>
                   <button
