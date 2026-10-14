@@ -1,40 +1,81 @@
+import axios from "axios";
+import { z } from "zod";
 import api from "./api";
 
-export type BookingTour = {
-  _id: string;
-  name: string;
-  slug: string;
-  duration: number;
-  price: number;
-  imageCover: string;
-  startDates?: string[];
-  startLocation?: {
-    description?: string;
-  };
-};
+const bookedTourSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  slug: z.string().optional(),
+  duration: z.number(),
+  price: z.number(),
+  maxGroupSize: z.number().optional(),
+  imageCover: z.string().optional(),
+  images: z.array(z.string()).optional(),
+  startDates: z.array(z.string()).optional(),
 
-export type Booking = {
-  _id: string;
-  tour: BookingTour;
-  user: string;
-  price: number;
-  paid: boolean;
-  createdAt: string;
-  startDate?: string;
-};
+  startLocation: z
+    .object({
+      description: z.string().optional(),
+    })
+    .nullable()
+    .optional(),
+});
 
-type GetMyBookingsResponse = {
-  status: "success";
-  results: number;
-  data: {
-    data: Booking[];
-  };
-};
+export const bookingSchema = z.object({
+  _id: z.string(),
+  tour: bookedTourSchema.nullable(),
+  price: z.number(),
+  createdAt: z.string(),
+  paid: z.boolean(),
+  startDate: z.string().optional(),
+});
 
-export async function getMyBookings(): Promise<Booking[]> {
-  const response = await api.get<GetMyBookingsResponse>(
+const myBookingsResponseSchema = z.object({
+  status: z.literal("success"),
+  results: z.number(),
+  data: z.object({
+    data: z.array(bookingSchema),
+  }),
+});
+
+export type Booking = z.infer<typeof bookingSchema>;
+
+export async function getMyBookings(
+  signal?: AbortSignal,
+): Promise<Booking[]> {
+  const response = await api.get<unknown>(
     "/bookings/my-bookings",
+    signal ? { signal } : undefined,
   );
 
-  return response.data.data.data;
+  const result = myBookingsResponseSchema.safeParse(response.data);
+
+  if (!result.success) {
+    console.error("Invalid bookings response:", result.error.issues);
+
+    throw new Error(
+      "The server returned unexpected booking data. Please try again.",
+    );
+  }
+
+  return result.data.data.data;
+}
+
+export function getBookingErrorMessage(error: unknown): string {
+  if (axios.isAxiosError<{ message?: string }>(error)) {
+    if (error.response?.status === 401) {
+      return "Please sign in to view your bookings.";
+    }
+
+    return (
+      error.response?.data?.message ||
+      "Unable to load your bookings. Please try again."
+    );
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Something went wrong. Please try again.";
 }

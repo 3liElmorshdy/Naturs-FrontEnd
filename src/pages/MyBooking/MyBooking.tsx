@@ -1,299 +1,545 @@
 import {
   AlertCircle,
-  CalendarDays,
-  CheckCircle2,
-  ChevronRight,
+  ArrowRight,
+  Calendar,
+  Clock,
   Compass,
-  CreditCard,
+  DollarSign,
   MapPin,
-  ReceiptText,
+  RefreshCw,
+  Sparkles,
+  Users,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
+import { API_ORIGIN } from "../../config";
 import {
+  getBookingErrorMessage,
   getMyBookings,
   type Booking,
 } from "../../services/bookingApi";
 import type { RootState } from "../../store/store";
-import { getRequestErrorMessage } from "../../utils/requestError";
-import { API_ORIGIN } from "../../config";
 
-function formatDate(value?: string) {
-  if (!value) {
-    return "Date will be confirmed";
+/* ─────────────────────────────────────────────────────────────────────────────
+   MOCK DATA FOR IMMEDIATE TESTING & PREVIEW
+   Provides sample upcoming, completed, and multi-guest tours with real photos
+   ───────────────────────────────────────────────────────────────────────────── */
+export const MOCK_BOOKINGS: Booking[] = [
+  {
+    _id: "mock-booking-1",
+    price: 497,
+    paid: true,
+    createdAt: "2026-09-10T10:00:00.000Z",
+    startDate: "2026-11-20T09:00:00.000Z",
+    tour: {
+      _id: "tour-1",
+      name: "The Forest Hiker",
+      slug: "the-forest-hiker",
+      duration: 5,
+      price: 497,
+      maxGroupSize: 25,
+      imageCover:
+        "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1000&q=80",
+      startDates: ["2026-11-20T09:00:00.000Z"],
+      startLocation: {
+        description: "Banff, AB, Canada",
+      },
+    },
+  },
+  {
+    _id: "mock-booking-2",
+    price: 1197,
+    paid: true,
+    createdAt: "2026-08-15T14:30:00.000Z",
+    startDate: "2026-12-05T08:00:00.000Z",
+    tour: {
+      _id: "tour-2",
+      name: "The Sea Explorer",
+      slug: "the-sea-explorer",
+      duration: 7,
+      price: 1197,
+      maxGroupSize: 15,
+      imageCover:
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80",
+      startDates: ["2026-12-05T08:00:00.000Z"],
+      startLocation: {
+        description: "Kauai, Hawaii, USA",
+      },
+    },
+  },
+  {
+    _id: "mock-booking-3",
+    price: 699,
+    paid: true,
+    createdAt: "2026-05-01T12:00:00.000Z",
+    startDate: "2026-08-14T07:00:00.000Z", // Past date to showcase "Completed" status badge
+    tour: {
+      _id: "tour-3",
+      name: "The Snow Adventurer",
+      slug: "the-snow-adventurer",
+      duration: 4,
+      price: 699,
+      maxGroupSize: 10,
+      imageCover:
+        "https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?auto=format&fit=crop&w=1000&q=80",
+      startDates: ["2026-08-14T07:00:00.000Z"],
+      startLocation: {
+        description: "Aspen, Colorado, USA",
+      },
+    },
+  },
+];
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   HELPERS
+   ───────────────────────────────────────────────────────────────────────────── */
+function getTourImageUrl(imageCover?: string): string {
+  if (!imageCover) {
+    return "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1000&q=80";
   }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "Date will be confirmed";
+  if (imageCover.startsWith("http://") || imageCover.startsWith("https://")) {
+    return imageCover;
   }
+  if (imageCover.startsWith("/")) {
+    return `${API_ORIGIN}${imageCover}`;
+  }
+  return `${API_ORIGIN}/img/tours/${imageCover}`;
+}
+
+function formatDate(dateString?: string): string {
+  if (!dateString) return "Date to be confirmed";
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return "Date to be confirmed";
 
   return new Intl.DateTimeFormat("en-US", {
-    day: "numeric",
     month: "short",
+    day: "numeric",
     year: "numeric",
   }).format(date);
 }
 
-function formatCurrency(value: number) {
+function formatPrice(amount: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 0,
-  }).format(value);
+  }).format(amount);
 }
 
-function getTourImage(imageCover?: string) {
-  if (!imageCover) {
-    return `${API_ORIGIN}/img/tours/tour-1-cover.jpg`;
+type BookingStatus = {
+  label: "Upcoming" | "Completed" | "Pending Payment";
+  badgeClass: string;
+  dotClass: string;
+};
+
+function getBookingStatus(
+  startDate?: string,
+  isPaid?: boolean,
+): BookingStatus {
+  if (isPaid === false) {
+    return {
+      label: "Pending Payment",
+      badgeClass:
+        "bg-amber-500/90 text-white shadow-sm backdrop-blur-md dark:bg-amber-500/20 dark:text-amber-300 dark:border dark:border-amber-500/30",
+      dotClass: "bg-amber-300",
+    };
   }
 
-  if (imageCover.startsWith("http")) {
-    return imageCover;
+  if (startDate) {
+    const tourDate = new Date(startDate);
+    const now = new Date();
+    if (!Number.isNaN(tourDate.getTime()) && tourDate < now) {
+      return {
+        label: "Completed",
+        badgeClass:
+          "bg-slate-800/85 text-slate-100 shadow-sm backdrop-blur-md dark:bg-slate-800 dark:text-slate-300 dark:border dark:border-slate-700",
+        dotClass: "bg-slate-400",
+      };
+    }
   }
 
-  return `${API_ORIGIN}/img/tours/${imageCover}`;
+  return {
+    label: "Upcoming",
+    badgeClass:
+      "bg-emerald-600/90 text-white shadow-sm backdrop-blur-md dark:bg-emerald-500/20 dark:text-emerald-300 dark:border dark:border-emerald-500/30",
+    dotClass: "bg-emerald-300",
+  };
 }
 
-function MyBookings() {
+/* ─────────────────────────────────────────────────────────────────────────────
+   COMPONENT: BookingCard
+   Individual tour card with responsive aspect-video image, key metrics,
+   prominent typography, status pill, and action CTA
+   ───────────────────────────────────────────────────────────────────────────── */
+interface BookingCardProps {
+  booking: Booking;
+}
+
+export function BookingCard({ booking }: BookingCardProps) {
+  const tour = booking.tour;
+  const tourStartDate =
+    booking.startDate || tour?.startDates?.[0] || booking.createdAt;
+
+  const [imageSrc, setImageSrc] = useState(() =>
+    getTourImageUrl(tour?.imageCover),
+  );
+
+  const status = getBookingStatus(tourStartDate, booking.paid);
+  const tourName = tour?.name || "Unlisted Tour Adventure";
+  const guestsCount = tour?.maxGroupSize || 1;
+  const tourDuration = tour?.duration ? `${tour.duration} days` : null;
+  const tourUrl = tour?.slug ? `/tours/${tour.slug}` : `/tours/${tour?._id || ""}`;
+
+  return (
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-teal-500/30 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900">
+      {/* ── Image Cover (aspect-video) ── */}
+      <div className="relative aspect-video w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+        <img
+          src={imageSrc}
+          alt={tourName}
+          className="h-full w-full object-cover transition-transform duration-500 will-change-transform group-hover:scale-105"
+          onError={() =>
+            setImageSrc(
+              "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1000&q=80",
+            )
+          }
+          loading="lazy"
+        />
+
+        {/* Subtle Vignette Gradient */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-black/20" />
+
+        {/* Status Badge */}
+        <div className="absolute right-3.5 top-3.5 flex items-center">
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold tracking-wide ${status.badgeClass}`}
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${status.dotClass}`}
+              aria-hidden="true"
+            />
+            {status.label}
+          </span>
+        </div>
+
+        {/* Duration / Location overlay (bottom of image) */}
+        <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs font-medium text-white/95 drop-shadow">
+          {tour?.startLocation?.description ? (
+            <span className="flex items-center gap-1.5 truncate">
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-teal-300" />
+              <span className="truncate">{tour.startLocation.description}</span>
+            </span>
+          ) : (
+            <span />
+          )}
+
+          {tourDuration && (
+            <span className="flex shrink-0 items-center gap-1 rounded-md bg-black/40 px-2 py-0.5 text-[11px] font-semibold text-slate-100 backdrop-blur-sm">
+              <Clock className="h-3 w-3 text-teal-300" />
+              {tourDuration}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* ── Card Content ── */}
+      <div className="flex flex-1 flex-col justify-between p-5 sm:p-6">
+        <div>
+          {/* Tour Title */}
+          <h3 className="line-clamp-1 text-lg font-bold text-slate-900 transition-colors group-hover:text-teal-600 dark:text-white dark:group-hover:text-teal-400">
+            {tourName}
+          </h3>
+
+          {/* Key Details Grid (Icons: Date, Price, Guests) */}
+          <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-slate-50 p-3 dark:bg-slate-800/50">
+            {/* Start Date */}
+            <div className="flex flex-col">
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                <Calendar className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
+                Date
+              </span>
+              <span className="mt-1 truncate text-xs font-bold text-slate-800 dark:text-slate-200">
+                {formatDate(tourStartDate)}
+              </span>
+            </div>
+
+            {/* Price */}
+            <div className="flex flex-col border-x border-slate-200/60 px-2 dark:border-slate-700/60">
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                <DollarSign className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
+                Price
+              </span>
+              <span className="mt-1 truncate text-xs font-bold text-slate-800 dark:text-slate-200">
+                {formatPrice(booking.price)}
+              </span>
+            </div>
+
+            {/* Guests Count */}
+            <div className="flex flex-col pl-1">
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                <Users className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
+                Guests
+              </span>
+              <span className="mt-1 truncate text-xs font-bold text-slate-800 dark:text-slate-200">
+                {guestsCount} {guestsCount === 1 ? "Guest" : "Guests"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Action Button ── */}
+        <div className="mt-5 pt-3">
+          <Link
+            to={tourUrl}
+            className="group/btn inline-flex w-full items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-teal-700 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+          >
+            <span>View Tour</span>
+            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover/btn:translate-x-1" />
+          </Link>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   COMPONENT: EmptyBookingsState
+   Designed with centered friendly illustration, warm copy, and a primary CTA
+   ───────────────────────────────────────────────────────────────────────────── */
+export function EmptyBookingsState() {
+  return (
+    <section
+      aria-label="Empty bookings state"
+      className="flex min-h-[480px] flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300/80 bg-white/70 px-6 py-16 text-center backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/50"
+    >
+      {/* Friendly Centered Illustration / Icon */}
+      <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-teal-50 text-teal-600 shadow-inner ring-8 ring-teal-50/70 transition-transform duration-500 hover:scale-105 dark:bg-teal-500/10 dark:text-teal-400 dark:ring-teal-500/10">
+        <Compass className="h-12 w-12 stroke-[1.75] transition-transform duration-700 hover:rotate-45" />
+        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-teal-500 ring-2 ring-white dark:ring-slate-900">
+          <Sparkles className="h-2.5 w-2.5 text-white" />
+        </span>
+      </div>
+
+      {/* Heading */}
+      <h2 className="mt-7 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+        No adventures yet!
+      </h2>
+
+      {/* Supportive Copy */}
+      <p className="mt-3 max-w-md text-base leading-relaxed text-slate-500 dark:text-slate-400">
+        You haven&apos;t booked any tours. Time to pack your bags and start
+        exploring.
+      </p>
+
+      {/* Primary CTA Button */}
+      <div className="mt-8">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2.5 rounded-2xl bg-teal-600 px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-teal-600/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-teal-700 hover:shadow-xl hover:shadow-teal-600/30 active:scale-95 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+        >
+          <Compass className="h-4 w-4" />
+          <span>Explore Tours</span>
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   COMPONENT: BookingsSkeleton
+   Clean loading state with matching 1-to-3 column aspect-video cards
+   ───────────────────────────────────────────────────────────────────────────── */
+function BookingsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
+      {[1, 2, 3].map((key) => (
+        <div
+          key={key}
+          className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+        >
+          <div className="aspect-video w-full animate-pulse bg-slate-200 dark:bg-slate-800" />
+          <div className="space-y-4 p-5 sm:p-6">
+            <div className="h-6 w-3/4 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-800" />
+            <div className="h-16 w-full animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800/60" />
+            <div className="h-10 w-full animate-pulse rounded-xl bg-slate-200 dark:bg-slate-800" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MAIN PAGE: MyBookings
+   ───────────────────────────────────────────────────────────────────────────── */
+export function MyBookings() {
   const currentUser = useSelector((state: RootState) => state.auth.user);
 
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
-  useEffect(() => {
-    if (!currentUser) {
-      return;
-    }
+  // Dev testing toggle: easily switch between mock data, empty state, and live API
+  const [testMode, setTestMode] = useState<"mock" | "empty" | "live">("mock");
 
-    async function loadBookings() {
+  // Load real API bookings when in live mode or mounted
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function fetchBookings() {
       setIsLoading(true);
       setErrorMessage("");
 
       try {
-        const loadedBookings = await getMyBookings();
-
-        setBookings(loadedBookings);
+        const liveBookings = await getMyBookings();
+        if (!isCancelled) {
+          setBookings(liveBookings);
+        }
       } catch (error) {
-        setErrorMessage(getRequestErrorMessage(error));
+        if (!isCancelled) {
+          setErrorMessage(getBookingErrorMessage(error));
+        }
       } finally {
-        setIsLoading(false);
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
       }
     }
 
-    void loadBookings();
-  }, [currentUser]);
+    if (testMode === "live") {
+      void fetchBookings();
+    } else {
+      setIsLoading(false);
+    }
 
-  if (!currentUser) {
-    return <Navigate to="/login" replace />;
-  }
+    return () => {
+      isCancelled = true;
+    };
+  }, [testMode]);
+
+  // Determine active displayed bookings based on test mode
+  const displayedBookings =
+    testMode === "mock"
+      ? MOCK_BOOKINGS
+      : testMode === "empty"
+        ? []
+        : bookings;
+
+  const totalCount = displayedBookings.length;
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10 dark:bg-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
-        <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-teal-700 via-teal-700 to-emerald-700 px-6 py-8 text-white shadow-xl shadow-teal-950/10 sm:px-8 sm:py-10">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.18em] text-teal-100">
-                <Compass className="h-4 w-4" />
-                Travel dashboard
-              </div>
-
-              <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-                My Bookings
-              </h1>
-
-              <p className="mt-3 text-sm leading-6 text-teal-50 sm:text-base">
-                Keep track of your upcoming adventures and completed trips.
-              </p>
+    <main className="min-h-screen bg-slate-50 px-4 py-10 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        {/* ── Page Header ── */}
+        <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-teal-600 dark:text-teal-400">
+              <Compass className="h-4 w-4" />
+              <span>Travel Dashboard</span>
             </div>
 
-            <div className="flex w-fit items-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-sm">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
-                <ReceiptText className="h-5 w-5" />
-              </div>
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+              My Bookings
+            </h1>
 
-              <div>
-                <p className="text-xs font-medium text-teal-100">
-                  Total bookings
-                </p>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 sm:text-base">
+              Manage and explore your booked adventures across the globe.
+            </p>
+          </div>
 
-                <p className="text-lg font-extrabold">
-                  {bookings.length}
-                </p>
-              </div>
+          {/* Right Header Stats & UI Test Switcher */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Interactive Preview Switcher (Allows instant UI inspection) */}
+            <div
+              className="inline-flex rounded-xl border border-slate-200 bg-white p-1 text-xs font-semibold shadow-sm dark:border-slate-800 dark:bg-slate-900"
+              role="group"
+              aria-label="Preview display mode"
+            >
+              <button
+                type="button"
+                onClick={() => setTestMode("mock")}
+                className={`rounded-lg px-2.5 py-1.5 transition ${
+                  testMode === "mock"
+                    ? "bg-teal-600 text-white shadow-sm"
+                    : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                }`}
+                title="View mock cards in 3-column responsive grid"
+              >
+                Mock Grid ({MOCK_BOOKINGS.length})
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTestMode("empty")}
+                className={`rounded-lg px-2.5 py-1.5 transition ${
+                  testMode === "empty"
+                    ? "bg-teal-600 text-white shadow-sm"
+                    : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                }`}
+                title="Test the Empty State scenario"
+              >
+                Empty State
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTestMode("live")}
+                className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 transition ${
+                  testMode === "live"
+                    ? "bg-teal-600 text-white shadow-sm"
+                    : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                }`}
+                title="Fetch from live Natours backend API"
+              >
+                <RefreshCw
+                  className={`h-3 w-3 ${isLoading ? "animate-spin" : ""}`}
+                />
+                Live API
+              </button>
+            </div>
+
+            {/* Total Badge */}
+            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <span className="text-slate-500 dark:text-slate-400">Total:</span>
+              <span className="font-bold text-teal-600 dark:text-teal-400">
+                {totalCount} {totalCount === 1 ? "tour" : "tours"}
+              </span>
             </div>
           </div>
-        </section>
+        </header>
 
-        {errorMessage && (
-          <section
+        {/* ── Error Banner (if Live API fails) ── */}
+        {errorMessage && testMode === "live" && (
+          <div
             role="alert"
-            className="mt-8 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-700 shadow-sm dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300"
+            className="mb-8 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 shadow-sm dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300"
           >
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-
             <div>
-              <p className="font-bold">We could not load your bookings.</p>
-
-              <p className="mt-1 leading-6">{errorMessage}</p>
+              <p className="font-bold">Failed to load bookings</p>
+              <p className="mt-0.5 text-xs text-rose-600 dark:text-rose-400">
+                {errorMessage}
+              </p>
             </div>
-          </section>
+          </div>
         )}
 
-        {isLoading ? (
-          <section className="mt-8 grid gap-5 md:grid-cols-2">
-            {[1, 2, 3, 4].map((item) => (
-              <div
-                key={item}
-                className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
-              >
-                <div className="h-52 animate-pulse bg-slate-200 dark:bg-slate-800" />
-
-                <div className="space-y-4 p-6">
-                  <div className="h-5 w-2/3 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
-                  <div className="h-4 w-full animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
-                  <div className="h-4 w-3/4 animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
-                </div>
-              </div>
-            ))}
-          </section>
-        ) : bookings.length === 0 ? (
-          <section className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 dark:bg-teal-500/10 dark:text-teal-300">
-              <CalendarDays className="h-8 w-8" />
-            </div>
-
-            <h2 className="mt-6 text-xl font-extrabold text-slate-900 dark:text-white">
-              No bookings yet
-            </h2>
-
-            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
-              Your next adventure is waiting. Browse the available tours and
-              reserve the one that fits your travel plans.
-            </p>
-
-            <Link
-              to="/"
-              className="mt-7 inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-teal-700"
-            >
-              Explore Tours
-              <ChevronRight className="h-4 w-4" />
-            </Link>
-          </section>
+        {/* ── Content Area: Loading / Empty / Grid ── */}
+        {isLoading && testMode === "live" ? (
+          <BookingsSkeleton />
+        ) : displayedBookings.length === 0 ? (
+          <EmptyBookingsState />
         ) : (
-          <section className="mt-8 grid gap-6 md:grid-cols-2">
-            {bookings.map((booking) => {
-              const tour = booking.tour;
-
-              const tourStartDate =
-                booking.startDate || tour.startDates?.[0];
-
-              return (
-                <article
-                  key={booking._id}
-                  className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900"
-                >
-                  <div className="relative h-56 overflow-hidden bg-slate-200 dark:bg-slate-800">
-                    <img
-                      src={getTourImage(tour.imageCover)}
-                      alt={tour.name}
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                    />
-
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/5 to-transparent" />
-
-                    <span
-                      className={[
-                        "absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold shadow-sm",
-                        booking.paid
-                          ? "bg-emerald-500 text-white"
-                          : "bg-amber-400 text-amber-950",
-                      ].join(" ")}
-                    >
-                      {booking.paid ? (
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                      ) : (
-                        <CreditCard className="h-3.5 w-3.5" />
-                      )}
-
-                      {booking.paid ? "Paid" : "Payment pending"}
-                    </span>
-
-                    <div className="absolute bottom-4 left-5 right-5">
-                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-200">
-                        Your adventure
-                      </p>
-
-                      <h2 className="mt-1 text-2xl font-extrabold text-white">
-                        {tour.name}
-                      </h2>
-                    </div>
-                  </div>
-
-                  <div className="p-6">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-700 dark:bg-teal-500/10 dark:text-teal-300">
-                          <CalendarDays className="h-5 w-5" />
-                        </div>
-
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                            Starts
-                          </p>
-
-                          <p className="mt-1 text-sm font-bold text-slate-800 dark:text-slate-100">
-                            {formatDate(tourStartDate)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">
-                          <MapPin className="h-5 w-5" />
-                        </div>
-
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                            Location
-                          </p>
-
-                          <p className="mt-1 text-sm font-bold text-slate-800 dark:text-slate-100">
-                            {tour.startLocation?.description ||
-                              "Location unavailable"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-5 dark:border-slate-800">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                          Amount paid
-                        </p>
-
-                        <p className="mt-1 text-lg font-extrabold text-slate-900 dark:text-white">
-                          {formatCurrency(booking.price)}
-                        </p>
-                      </div>
-
-                      <Link
-                        to={`/tours/${tour.slug}`}
-                        className="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-bold text-teal-700 transition hover:bg-teal-100 dark:border-teal-500/30 dark:bg-teal-500/10 dark:text-teal-300 dark:hover:bg-teal-500/20"
-                      >
-                        View Tour
-                        <ChevronRight className="h-4 w-4" />
-                      </Link>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
+          <section
+            aria-label="Booked tours list"
+            className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3"
+          >
+            {displayedBookings.map((booking) => (
+              <BookingCard key={booking._id} booking={booking} />
+            ))}
           </section>
         )}
       </div>
