@@ -7,7 +7,7 @@ interface TourReviewsProps {
   reviews: Review[];
   isLoading: boolean;
   isError: boolean;
-  currentUserId?: string;
+  currentUserId?: string | undefined;
   tourId: string;
   tourSlug: string;
   onEditReview?: (reviewId: string) => void;

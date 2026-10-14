@@ -1,19 +1,10 @@
-import type { UserRole } from './User.js';
+import type { default as User, UserRole } from './User.js';
 
 // ─── User ──────────────────────────────────────────────────────────────────────
 // نفس الـ interface الموجودة في User.ts لكن مُعاد تصديرها هنا للـ auth context
-export interface AuthUser {
-  _id: string;
-  id?: string;
-  name: string;
-  email: string;
-  photo?: string;
-  role: UserRole;
-  isVerified?: boolean;
-  createdAt?: string | Date;
-  passwordChangedAt?: string | Date;
+export interface AuthUser extends User {
   refreshToken?: string;
-  refreshTokenExpiresAt?: string | Date;
+  refreshTokenExpiresAt?: string;
 }
 
 // ─── Auth API Response ─────────────────────────────────────────────────────────
