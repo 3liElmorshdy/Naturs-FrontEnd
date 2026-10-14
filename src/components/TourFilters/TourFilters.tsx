@@ -58,7 +58,7 @@ export function TourFilters({
   }
 
   return (
-    <section className="sticky top-16 z-40 -mt-8">
+    <section className="sticky top-16 z-30 -mt-8">
       <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-lg backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-800">
           <div className="flex flex-wrap items-center gap-3">

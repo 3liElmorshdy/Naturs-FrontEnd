@@ -7,6 +7,7 @@ import { API_ORIGIN as API_URL } from "../../config";
 const TOURS_IMAGE_BASE = `${API_URL}/img/tours/`;
 interface TourCardProps {
   tour: Tour;
+  distance?: number;
   distanceUnit?: DistanceUnit;
 }
 
@@ -33,6 +34,7 @@ const getTourImageUrl = (imageCover?: string) => {
 };
 export function TourCard({
   tour,
+  distance,
   distanceUnit = "mi",
 }: TourCardProps) 
 
@@ -136,7 +138,7 @@ export function TourCard({
 
 
 
-{tour.distance !== undefined && (
+{(distance ?? tour.distance) !== undefined && (
   <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-teal-600 dark:text-teal-400">
     <svg
       className="h-3.5 w-3.5 shrink-0"
@@ -159,7 +161,7 @@ export function TourCard({
     </svg>
 
     <span>
-      {formatDistance(tour.distance, distanceUnit)}
+      {formatDistance((distance ?? tour.distance)!, distanceUnit)}
     </span>
   </p>
 )}

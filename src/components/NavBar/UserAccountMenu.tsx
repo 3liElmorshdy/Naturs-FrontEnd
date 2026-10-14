@@ -121,7 +121,7 @@ export function UserAccountMenu({ user, onLogout }: UserAccountMenuProps) {
         <div
           role="menu"
           aria-orientation="vertical"
-          className="absolute right-0 mt-2 w-64 origin-top-right overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl ring-1 ring-black/5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900 dark:ring-white/10"
+          className="absolute right-0 mt-2 w-64 origin-top-right overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl ring-1 ring-black/5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900 dark:ring-white/10 z-50"
         >
           {/* User Account Info Header */}
           <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/40">

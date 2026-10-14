@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Link, NavLink } from "react-router-dom";
 
 import type User from "../../types/User";
@@ -57,7 +58,7 @@ export function MobileSidebar({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === "undefined") return null;
 
   function linkClassName({ isActive }: { isActive: boolean }) {
     return `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
@@ -67,9 +68,9 @@ export function MobileSidebar({
     }`;
   }
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 md:hidden"
+      className="fixed inset-0 z-[100] md:hidden"
       role="dialog"
       aria-modal="true"
       aria-label="Mobile Navigation"
@@ -82,9 +83,9 @@ export function MobileSidebar({
       />
 
       {/* Drawer Panel */}
-      <div className="fixed inset-y-0 right-0 flex w-full max-w-xs flex-col bg-white shadow-2xl transition-transform dark:bg-slate-900">
+      <div className="fixed inset-y-0 right-0 z-10 flex h-full h-[100dvh] w-full max-w-xs flex-col bg-white shadow-2xl transition-transform dark:bg-slate-900">
         {/* Drawer Header */}
-        <div className="flex h-16 items-center justify-between border-b border-slate-100 px-5 dark:border-slate-800">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-100 px-5 dark:border-slate-800">
           <div onClick={onClose}>
             <Logo />
           </div>
@@ -101,7 +102,7 @@ export function MobileSidebar({
 
         {/* User Banner (if logged in) */}
         {user && (
-          <div className="border-b border-slate-100 bg-slate-50/70 p-5 dark:border-slate-800 dark:bg-slate-800/40">
+          <div className="shrink-0 border-b border-slate-100 bg-slate-50/70 p-5 dark:border-slate-800 dark:bg-slate-800/40">
             <Link
               to="/profile"
               onClick={onClose}
@@ -125,7 +126,7 @@ export function MobileSidebar({
         )}
 
         {/* Scrollable Navigation Body */}
-        <div className="flex-1 overflow-y-auto px-4 py-5 space-y-6">
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 py-5 space-y-6">
           {/* Main App Navigation */}
           <div>
             <p className="px-3 pb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
@@ -222,7 +223,7 @@ export function MobileSidebar({
 
         {/* Drawer Footer (Sign out) */}
         {user && (
-          <div className="border-t border-slate-100 p-4 dark:border-slate-800">
+          <div className="shrink-0 border-t border-slate-100 p-4 dark:border-slate-800 mt-auto">
             <button
               type="button"
               onClick={() => {
@@ -237,7 +238,8 @@ export function MobileSidebar({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
