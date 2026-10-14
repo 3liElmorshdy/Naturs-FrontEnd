@@ -73,9 +73,64 @@ export async function createTour(
   return response.data.data.data;
 }
 
+export async function updateTour(
+  tourId: string,
+  payload: Partial<Omit<CreateTourPayload, "imageCover" | "images">>,
+  files?: {
+    imageCover?: File | null;
+    images?: File[];
+  },
+) {
+  const formData = new FormData();
 
+  if (payload.name) formData.append("name", payload.name);
+  if (payload.slug) formData.append("slug", payload.slug);
+  if (payload.duration !== undefined)
+    formData.append("duration", String(payload.duration));
+  if (payload.maxGroupSize !== undefined)
+    formData.append("maxGroupSize", String(payload.maxGroupSize));
+  if (payload.difficulty) formData.append("difficulty", payload.difficulty);
+  if (payload.price !== undefined)
+    formData.append("price", String(payload.price));
+  if (payload.summary) formData.append("summary", payload.summary);
+  if (payload.description)
+    formData.append("description", payload.description);
 
+  if (payload.startDates && payload.startDates.length > 0) {
+    payload.startDates.forEach((date) => formData.append("startDates", date));
+  }
+  if (payload.guides && payload.guides.length > 0) {
+    payload.guides.forEach((guide) => formData.append("guides", guide));
+  }
 
+  if (payload.startLocation) {
+    formData.append("startLocation[type]", payload.startLocation.type);
+    formData.append(
+      "startLocation[description]",
+      payload.startLocation.description,
+    );
+    payload.startLocation.coordinates.forEach((coordinate) =>
+      formData.append("startLocation[coordinates][]", String(coordinate)),
+    );
+  }
+
+  if (files?.imageCover) {
+    formData.append("imageCover", files.imageCover);
+  }
+  if (files?.images && files.images.length > 0) {
+    files.images.forEach((image) => formData.append("images", image));
+  }
+
+  const response = await api.patch<CreateTourResponse>(
+    `/tours/${tourId}`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    },
+  );
+
+  return response.data.data.data;
+}
 
 export async function deleteTour(tourId: string) {
   await api.delete(`/tours/${tourId}`);

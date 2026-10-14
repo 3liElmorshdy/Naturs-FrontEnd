@@ -2,7 +2,7 @@ import { useMemo, useState, type FormEvent } from "react";
 import { createInitialForm } from "../constants";
 import type { TourFormState } from "../types";
 import { slugify } from "../utils";
-import { createTour } from "../../../../services/tourApi";
+import { createTour, updateTour } from "../../../../services/tourApi";
 import {
   tourFormSchema,
   type TourFormValues,
@@ -29,6 +29,7 @@ export function useTourForm({
   onClearMessages,
 }: UseTourFormParams) {
   const [form, setForm] = useState<TourFormState>(createInitialForm());
+  const [editingTourId, setEditingTourId] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -220,8 +221,48 @@ export function useTourForm({
     );
   }
 
+  function loadTour(tour: Tour) {
+    setEditingTourId(tour._id);
+    setForm({
+      name: tour.name || "",
+      slug: tour.slug || "",
+      duration: tour.duration != null ? String(tour.duration) : "",
+      maxGroupSize: tour.maxGroupSize != null ? String(tour.maxGroupSize) : "",
+      difficulty: tour.difficulty || "easy",
+      price: tour.price != null ? String(tour.price) : "",
+      summary: tour.summary || "",
+      description: tour.description || "",
+      imageCover: tour.imageCover || "",
+      images: tour.images && tour.images.length > 0 ? tour.images : [""],
+      startDates:
+        tour.startDates && tour.startDates.length > 0
+          ? tour.startDates.map((d) => {
+              if (!d) return "";
+              const dateStr =
+                typeof d === "string" ? d : new Date(d).toISOString();
+              return dateStr.split("T")[0] || "";
+            })
+          : [""],
+      guides: tour.guides
+        ? tour.guides.map((g) => (typeof g === "string" ? g : g._id))
+        : [],
+      startLocationDescription: tour.startLocation?.description || "",
+      startLocationLongitude:
+        tour.startLocation?.coordinates?.[0] != null
+          ? String(tour.startLocation.coordinates[0])
+          : "",
+      startLocationLatitude:
+        tour.startLocation?.coordinates?.[1] != null
+          ? String(tour.startLocation.coordinates[1])
+          : "",
+    });
+    setFieldErrors({});
+    setHasSubmitted(false);
+  }
+
   function resetForm() {
     setForm(createInitialForm());
+    setEditingTourId(null);
     resetImages();
     setFieldErrors({});
     setHasSubmitted(false);
@@ -249,7 +290,7 @@ export function useTourForm({
 
       setFieldErrors(errors);
       onError(
-        "Please review the highlighted fields before creating the tour.",
+        "Please review the highlighted fields before saving the tour.",
       );
       setIsSubmitting(false);
 
@@ -262,10 +303,11 @@ export function useTourForm({
 
     const values: TourFormValues = result.data;
 
-    if (!coverFile) {
+    // Cover image is required on create, or on edit if no existing cover
+    if (!coverFile && !form.imageCover) {
       reportImageError("imageCover", "Cover image is required.");
       onError(
-        "Please review the highlighted fields before creating the tour.",
+        "Please review the highlighted fields before saving the tour.",
       );
       setIsSubmitting(false);
       return;
@@ -295,18 +337,38 @@ export function useTourForm({
     };
 
     try {
-      const createdTour = await createTour(payload, {
-        imageCover: coverFile,
-        images: galleryFiles,
-      });
+      if (editingTourId) {
+        const updatedTour = await updateTour(editingTourId, payload, {
+          imageCover: coverFile,
+          images: galleryFiles,
+        });
 
-      onSuccess(
-        createdTour,
-        `"${payload.name}" was created successfully and added to the tours catalog.`,
-        payload.slug || "",
-      );
+        onSuccess(
+          updatedTour,
+          `"${payload.name}" was updated successfully.`,
+          payload.slug || "",
+        );
+      } else {
+        if (!coverFile) {
+          reportImageError("imageCover", "Cover image is required.");
+          setIsSubmitting(false);
+          return;
+        }
+
+        const createdTour = await createTour(payload, {
+          imageCover: coverFile,
+          images: galleryFiles,
+        });
+
+        onSuccess(
+          createdTour,
+          `"${payload.name}" was created successfully and added to the tours catalog.`,
+          payload.slug || "",
+        );
+      }
 
       setForm(createInitialForm());
+      setEditingTourId(null);
       resetImages();
       setFieldErrors({});
       setHasSubmitted(false);
@@ -332,10 +394,13 @@ export function useTourForm({
     fieldErrors,
     hasSubmitted,
     isSubmitting,
+    isEditing: Boolean(editingTourId),
+    editingTourId,
     generatedSlug,
     galleryImageCount,
     startDateCount,
     requiredFieldsProgress,
+    loadTour,
     updateField,
     validateField,
     clearFieldError,

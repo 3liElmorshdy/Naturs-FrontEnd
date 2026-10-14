@@ -1,14 +1,4 @@
-import {
-  AlertCircle,
-  ArrowLeft,
-  ArrowRight,
-  CalendarDays,
-  CheckCircle2,
-  Compass,
-  Layers,
-  Map,
-  Plus,
-} from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import React, { useCallback, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
@@ -18,18 +8,11 @@ import type Tour from "../../../types/Tour";
 import { deleteTour } from "../../../services/tourApi";
 import { getRequestErrorMessage } from "../../../utils/requestError";
 
-import TourSetupProgress from "./components/TourSetupProgress";
-import TourFormStepper, {
-  TOUR_FORM_STEPS,
-} from "./components/TourFormStepper";
-import BasicInformationSection from "./components/BasicInformationSection";
-import StartLocationSection from "./components/StartLocationSection";
-import TourContentSection from "./components/TourContentSection";
-import MediaImagesSection from "./components/MediaImagesSection";
-import TourGuidesSection from "./components/TourGuidesSection";
-import ScheduleSection from "./components/ScheduleSection";
-import TourPreviewCard from "./components/TourPreviewCard";
+import TourManagementHeader from "./components/TourManagementHeader";
+import TourCatalogStats from "./components/TourCatalogStats";
 import ExistingToursSection from "./components/ExistingToursSection";
+import TourFormWizard from "./components/TourFormWizard";
+import { TOUR_FORM_STEPS } from "./components/TourFormStepper";
 import ResetFormModal from "./components/ResetFormModal";
 import CancelConfirmModal from "./components/CancelConfirmModal";
 import DeleteTourModal from "./components/DeleteTourModal";
@@ -42,7 +25,7 @@ function ManageTours() {
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // View mode: "catalog" (Existing Tours) or "create" (Create Tour Wizard)
+  // View mode: "catalog" (Existing Tours) or "create" (Create/Edit Tour Wizard)
   const activeView =
     searchParams.get("view") === "create" ? "create" : "catalog";
 
@@ -85,14 +68,23 @@ function ManageTours() {
     coverFile: images.coverFile,
     galleryFiles: images.galleryFiles,
     resetImages: images.resetImages,
-    onSuccess: (newTour, message, slug) => {
-      setTours((currentTours) => [newTour, ...currentTours]);
+    onSuccess: (newOrUpdatedTour, message, slug) => {
+      setTours((currentTours) => {
+        const exists = currentTours.some(
+          (t) => t._id === newOrUpdatedTour._id,
+        );
+        if (exists) {
+          return currentTours.map((t) =>
+            t._id === newOrUpdatedTour._id ? newOrUpdatedTour : t,
+          );
+        }
+        return [newOrUpdatedTour, ...currentTours];
+      });
       setSuccessMessage(message);
       setCreatedTourSlug(slug);
     },
     onError: (message) => {
       setErrorMessage(message);
-      // Auto-jump to the first step containing an error
       jumpToFirstErrorStep();
     },
     onClearMessages: () => {
@@ -152,8 +144,7 @@ function ManageTours() {
       }
       if (stepIndex === 2) {
         return Boolean(
-          (images.coverFile || form.imageCover) &&
-            form.images.some(Boolean),
+          (images.coverFile || form.imageCover) && form.images.some(Boolean),
         );
       }
       return false;
@@ -180,8 +171,19 @@ function ManageTours() {
   function handleOpenCreateTour() {
     setErrorMessage("");
     setSuccessMessage("");
+    tourForm.resetForm();
     setSearchParams({ view: "create" });
     setCurrentStep(0);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // Switch to Edit View
+  function handleEditTour(tour: Tour) {
+    setErrorMessage("");
+    setSuccessMessage("");
+    tourForm.loadTour(tour);
+    setCurrentStep(0);
+    setSearchParams({ view: "create", edit: tour._id });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -244,20 +246,6 @@ function ManageTours() {
     }
   }
 
-  function handleNextStep() {
-    if (currentStep < 2) {
-      setCurrentStep((prev) => prev + 1);
-      window.scrollTo({ top: 220, behavior: "smooth" });
-    }
-  }
-
-  function handlePreviousStep() {
-    if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1);
-      window.scrollTo({ top: 220, behavior: "smooth" });
-    }
-  }
-
   if (!currentUser) {
     return <Navigate to="/login" replace />;
   }
@@ -269,62 +257,15 @@ function ManageTours() {
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10 dark:bg-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
-        {/* ─── Top Header ────────────────────────────────────────── */}
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 text-teal-700 shadow-sm dark:bg-teal-500/20 dark:text-teal-400">
-                <Map className="h-5 w-5" />
-              </div>
-
-              <p className="text-sm font-bold uppercase tracking-widest text-teal-700 dark:text-teal-400">
-                Tour Management
-              </p>
-            </div>
-
-            <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-              {activeView === "create" ? "Create New Tour" : "Tours Catalog"}
-            </h1>
-
-            <p className="mt-2 text-base text-slate-500 dark:text-slate-400">
-              {activeView === "create"
-                ? "Follow the 3-step setup to publish a new adventure to the catalog."
-                : "Browse, view, and manage all adventures in Natours."}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold capitalize text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-teal-500" />
-              </span>
-              {currentUser.role.replace("-", " ")}
-            </div>
-
-            {activeView === "catalog" && (
-              <button
-                type="button"
-                onClick={handleOpenCreateTour}
-                className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-teal-700 hover:shadow-md hover:shadow-teal-500/20"
-              >
-                <Plus className="h-4 w-4 stroke-[2.5]" />
-                <span>Create Tour</span>
-              </button>
-            )}
-
-            {activeView === "create" && (
-              <button
-                type="button"
-                onClick={handleCancelCreate}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span>Back to Catalog</span>
-              </button>
-            )}
-          </div>
-        </div>
+        {/* ─── Reusable Management Header ───────────────────────── */}
+        <TourManagementHeader
+          activeView={activeView}
+          isEditing={tourForm.isEditing}
+          editingTourName={tourForm.form.name}
+          userRole={currentUser.role}
+          onOpenCreate={handleOpenCreateTour}
+          onCancelCreate={handleCancelCreate}
+        />
 
         {/* ─── Global Error & Success Alerts ─────────────────────── */}
         {errorMessage && (
@@ -383,233 +324,38 @@ function ManageTours() {
         {/* ─── VIEW 1: CATALOG (EXISTING TOURS) ──────────────────── */}
         {activeView === "catalog" && (
           <div className="mt-8 space-y-6">
-            {/* Quick Metrics Bar */}
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Total Tours
-                </p>
-                <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">
-                  {catalogStats.total}
-                </p>
-              </div>
+            <TourCatalogStats
+              total={catalogStats.total}
+              easy={catalogStats.easy}
+              medium={catalogStats.medium}
+              difficult={catalogStats.difficult}
+            />
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <p className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                  Easy
-                </p>
-                <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">
-                  {catalogStats.easy}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <p className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                  Medium
-                </p>
-                <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">
-                  {catalogStats.medium}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <p className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
-                  Difficult
-                </p>
-                <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">
-                  {catalogStats.difficult}
-                </p>
-              </div>
-            </div>
-
-            {/* Existing Tours List */}
             <ExistingToursSection
               tours={tours}
               isLoadingTours={isLoadingTours}
               onDeleteClick={openDeleteModal}
+              onEditClick={handleEditTour}
               onCreateClick={handleOpenCreateTour}
             />
           </div>
         )}
 
-        {/* ─── VIEW 2: CREATE TOUR (STEPPER / WIZARD) ─────────────── */}
+        {/* ─── VIEW 2: CREATE / EDIT TOUR (WIZARD) ────────────────── */}
         {activeView === "create" && (
-          <div className="mt-6">
-            {/* Setup Progress */}
-            <TourSetupProgress progress={tourForm.requiredFieldsProgress} />
-
-            {/* Stepper Tabs Navigation */}
-            <TourFormStepper
-              currentStep={currentStep}
-              onStepClick={(stepIndex) => setCurrentStep(stepIndex)}
-              fieldErrors={tourForm.fieldErrors}
-              isStepCompleted={isStepCompleted}
-            />
-
-            {/* ─── Multi-step Form ─────────────────────────────── */}
-            <form onSubmit={tourForm.handleSubmit} className="mt-8">
-              {/* STEP 1: Basic Info & Content */}
-              <div
-                className={`space-y-8 ${
-                  currentStep === 0 ? "block" : "hidden"
-                }`}
-              >
-                <BasicInformationSection
-                  form={tourForm.form}
-                  fieldErrors={tourForm.fieldErrors}
-                  generatedSlug={tourForm.generatedSlug}
-                  onChange={tourForm.updateField}
-                  onBlur={(field) =>
-                    tourForm.validateField(field, tourForm.form)
-                  }
-                  renderFieldError={renderFieldError}
-                />
-
-                <TourContentSection
-                  form={tourForm.form}
-                  fieldErrors={tourForm.fieldErrors}
-                  onChange={tourForm.updateField}
-                  onBlur={(field) =>
-                    tourForm.validateField(field, tourForm.form)
-                  }
-                  renderFieldError={renderFieldError}
-                />
-              </div>
-
-              {/* STEP 2: Location, Guides & Schedule */}
-              <div
-                className={`space-y-8 ${
-                  currentStep === 1 ? "block" : "hidden"
-                }`}
-              >
-                <StartLocationSection
-                  form={tourForm.form}
-                  fieldErrors={tourForm.fieldErrors}
-                  onChange={tourForm.updateField}
-                  renderFieldError={renderFieldError}
-                />
-
-                <TourGuidesSection
-                  guides={guides}
-                  isLoadingGuides={isLoadingGuides}
-                  selectedGuideIds={tourForm.form.guides}
-                  selectedGuideNames={selectedGuideNames}
-                  onToggleGuide={tourForm.toggleGuide}
-                  renderFieldError={renderFieldError}
-                />
-
-                <ScheduleSection
-                  startDates={tourForm.form.startDates}
-                  startDateCount={tourForm.startDateCount}
-                  fieldErrors={tourForm.fieldErrors}
-                  onUpdateStartDate={tourForm.updateStartDate}
-                  onAddStartDate={tourForm.addStartDate}
-                  onRemoveStartDate={tourForm.removeStartDate}
-                  onBlur={() =>
-                    tourForm.validateField("startDates", tourForm.form)
-                  }
-                  renderFieldError={renderFieldError}
-                />
-              </div>
-
-              {/* STEP 3: Media & Live Review */}
-              <div
-                className={`space-y-8 ${
-                  currentStep === 2 ? "block" : "hidden"
-                }`}
-              >
-                <MediaImagesSection
-                  coverPreview={images.coverPreview}
-                  galleryPreviews={images.galleryPreviews}
-                  galleryFiles={images.galleryFiles}
-                  galleryImageCount={tourForm.galleryImageCount}
-                  fieldErrors={tourForm.fieldErrors}
-                  onCoverSelected={images.handleCoverSelected}
-                  onRemoveCover={images.removeCover}
-                  onGallerySelected={images.handleGallerySelected}
-                  onRemoveGalleryFile={images.removeGalleryFile}
-                  onReportImageError={tourForm.reportImageError}
-                  renderFieldError={renderFieldError}
-                />
-
-                <TourPreviewCard
-                  form={tourForm.form}
-                  coverPreview={images.coverPreview}
-                  galleryImageCount={tourForm.galleryImageCount}
-                  startDateCount={tourForm.startDateCount}
-                  selectedGuideNames={selectedGuideNames}
-                  generatedSlug={tourForm.generatedSlug}
-                />
-              </div>
-
-              {/* ─── Bottom Actions Bar ─────────────────────────── */}
-              <div className="mt-10 flex flex-col-reverse justify-between gap-4 border-t border-slate-200 pt-6 dark:border-slate-800 sm:flex-row sm:items-center">
-                {/* Left actions: Cancel & Reset */}
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={handleCancelCreate}
-                    disabled={tourForm.isSubmitting}
-                    className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={requestResetForm}
-                    disabled={tourForm.isSubmitting}
-                    className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-                  >
-                    Reset Form
-                  </button>
-                </div>
-
-                {/* Right actions: Previous, Next, Submit */}
-                <div className="flex items-center gap-3">
-                  {currentStep > 0 && (
-                    <button
-                      type="button"
-                      onClick={handlePreviousStep}
-                      disabled={tourForm.isSubmitting}
-                      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                    >
-                      <ArrowLeft className="h-4 w-4" />
-                      <span>Previous</span>
-                    </button>
-                  )}
-
-                  {currentStep < 2 ? (
-                    <button
-                      type="button"
-                      onClick={handleNextStep}
-                      className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-teal-700 hover:shadow-md hover:shadow-teal-500/20"
-                    >
-                      <span>
-                        Next: {TOUR_FORM_STEPS[currentStep + 1]?.label}
-                      </span>
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={tourForm.isSubmitting || isLoadingGuides}
-                      className="inline-flex items-center justify-center gap-3 rounded-xl bg-teal-600 px-8 py-3.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-teal-700 hover:shadow-md hover:shadow-teal-500/25 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {tourForm.isSubmitting && (
-                        <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      )}
-                      <span>
-                        {tourForm.isSubmitting
-                          ? "Creating Tour..."
-                          : "Create Tour"}
-                      </span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            </form>
-          </div>
+          <TourFormWizard
+            tourForm={tourForm}
+            images={images}
+            guides={guides}
+            isLoadingGuides={isLoadingGuides}
+            selectedGuideNames={selectedGuideNames}
+            currentStep={currentStep}
+            onStepChange={setCurrentStep}
+            isStepCompleted={isStepCompleted}
+            renderFieldError={renderFieldError}
+            onCancel={handleCancelCreate}
+            onRequestReset={requestResetForm}
+          />
         )}
 
         {/* ─── Modals ────────────────────────────────────────────── */}
