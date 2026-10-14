@@ -7,6 +7,40 @@ import { useLogin } from "../../hooks/auth/useLogin";
 import Divider from "../../components/Divider/Divider";
 import GoogleIcon from "../../components/GoogleIcon/GoogleIcon";
 
+function renderServerError(serverError: string) {
+  const match = serverError.match(/(.*?)contact support(\.?)(\s*)/i);
+  if (match) {
+    return (
+      <span>
+        {match[1]}
+        <Link
+          to="/contact"
+          className="font-semibold underline hover:text-red-900 dark:hover:text-red-200 transition-colors"
+        >
+          contact support
+        </Link>
+        {match[2]}
+      </span>
+    );
+  }
+
+  if (/deactivated/i.test(serverError)) {
+    return (
+      <span>
+        {serverError}{" "}
+        <Link
+          to="/contact"
+          className="font-semibold underline hover:text-red-900 dark:hover:text-red-200 transition-colors"
+        >
+          Contact support
+        </Link>
+      </span>
+    );
+  }
+
+  return <span>{serverError}</span>;
+}
+
 const Login: React.FC = () => {
   // Destructure everything needed from the custom hook
   const {
@@ -41,8 +75,10 @@ const Login: React.FC = () => {
                 role="alert"
                 className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400"
               >
-                <span>⚠️</span>
-                <span>{serverError}</span>
+                <span className="shrink-0 mt-0.5">⚠️</span>
+                <div className="flex-1 leading-relaxed">
+                  {renderServerError(serverError)}
+                </div>
               </div>
             )}
 
