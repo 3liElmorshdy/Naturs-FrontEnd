@@ -1,4 +1,4 @@
-import api from "./api";
+﻿import api from "./api";
 import type { User } from "../types/User";
 import Tour, { CreateTourPayload } from "../types/Tour";
 
@@ -18,10 +18,10 @@ export async function getAllUsers() {
     results: response.data.results,
   };
 }
+
 export async function deleteSpecificUser(userId: string) {
   await api.delete(`/users/${userId}`);
 }
-
 
 export async function getSpecificUser(userId: string) {
   const response = await api.get(`/users/${userId}`);
@@ -29,7 +29,30 @@ export async function getSpecificUser(userId: string) {
   return response.data.data.data;
 }
 
+export interface UpdateUserPayload {
+  name?: string;
+  role?: User["role"];
+  active?: boolean;
+}
 
+type UpdateUserResponse = {
+  status: "success";
+  data: {
+    data: User;
+  };
+};
+
+export async function updateSpecificUser(
+  userId: string,
+  payload: UpdateUserPayload,
+): Promise<User> {
+  const response = await api.patch<UpdateUserResponse>(
+    `/users/${userId}`,
+    payload,
+  );
+
+  return response.data.data.data;
+}
 
 type CreateTourResponse = {
   status: "success";
@@ -46,6 +69,7 @@ export async function createTour(payload: CreateTourPayload) {
 
   return response.data.data.data;
 }
+
 export async function getTourGuides() {
   const response = await api.get<GetAllUsersResponse>("/users");
 

@@ -8,20 +8,28 @@ export function getInitials(name: string) {
     .join("");
 }
 
-export function formatDate(value?: string | Date) {
-  if (!value) {
-    return "Not available";
+export function formatDate(value?: string | Date, id?: string) {
+  if (value) {
+    const date = new Date(value);
+    if (!Number.isNaN(date.getTime())) {
+      return new Intl.DateTimeFormat("en", {
+        dateStyle: "long",
+      }).format(date);
+    }
   }
 
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "Not available";
+  // Fallback: استخراج التاريخ من أول 8 خانات في الـ ObjectId
+  if (id && id.length === 24) {
+    const timestamp = parseInt(id.substring(0, 8), 16) * 1000;
+    const date = new Date(timestamp);
+    if (!Number.isNaN(date.getTime())) {
+      return new Intl.DateTimeFormat("en", {
+        dateStyle: "long",
+      }).format(date);
+    }
   }
 
-  return new Intl.DateTimeFormat("en", {
-    dateStyle: "long",
-  }).format(date);
+  return "Not available";
 }
 
 

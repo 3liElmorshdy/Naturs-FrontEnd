@@ -96,7 +96,7 @@ const showImage = Boolean(photoUrl) && !hasImageError;
         </p>
 
         <p className="mt-1 text-sm text-slate-700 dark:text-slate-200">
-          {formatDate(user.createdAt)}
+          {formatDate(user.createdAt, user._id)}
         </p>
       </div>
     </aside>
