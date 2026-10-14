@@ -10,8 +10,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { API_ORIGIN } from "../../config";
@@ -20,77 +19,6 @@ import {
   getMyBookings,
   type Booking,
 } from "../../services/bookingApi";
-import type { RootState } from "../../store/store";
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   MOCK DATA FOR IMMEDIATE TESTING & PREVIEW
-   Provides sample upcoming, completed, and multi-guest tours with real photos
-   ───────────────────────────────────────────────────────────────────────────── */
-export const MOCK_BOOKINGS: Booking[] = [
-  {
-    _id: "mock-booking-1",
-    price: 497,
-    paid: true,
-    createdAt: "2026-09-10T10:00:00.000Z",
-    startDate: "2026-11-20T09:00:00.000Z",
-    tour: {
-      _id: "tour-1",
-      name: "The Forest Hiker",
-      slug: "the-forest-hiker",
-      duration: 5,
-      price: 497,
-      maxGroupSize: 25,
-      imageCover:
-        "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1000&q=80",
-      startDates: ["2026-11-20T09:00:00.000Z"],
-      startLocation: {
-        description: "Banff, AB, Canada",
-      },
-    },
-  },
-  {
-    _id: "mock-booking-2",
-    price: 1197,
-    paid: true,
-    createdAt: "2026-08-15T14:30:00.000Z",
-    startDate: "2026-12-05T08:00:00.000Z",
-    tour: {
-      _id: "tour-2",
-      name: "The Sea Explorer",
-      slug: "the-sea-explorer",
-      duration: 7,
-      price: 1197,
-      maxGroupSize: 15,
-      imageCover:
-        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80",
-      startDates: ["2026-12-05T08:00:00.000Z"],
-      startLocation: {
-        description: "Kauai, Hawaii, USA",
-      },
-    },
-  },
-  {
-    _id: "mock-booking-3",
-    price: 699,
-    paid: true,
-    createdAt: "2026-05-01T12:00:00.000Z",
-    startDate: "2026-08-14T07:00:00.000Z", // Past date to showcase "Completed" status badge
-    tour: {
-      _id: "tour-3",
-      name: "The Snow Adventurer",
-      slug: "the-snow-adventurer",
-      duration: 4,
-      price: 699,
-      maxGroupSize: 10,
-      imageCover:
-        "https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?auto=format&fit=crop&w=1000&q=80",
-      startDates: ["2026-08-14T07:00:00.000Z"],
-      startLocation: {
-        description: "Aspen, Colorado, USA",
-      },
-    },
-  },
-];
 
 /* ─────────────────────────────────────────────────────────────────────────────
    HELPERS
@@ -376,59 +304,27 @@ function BookingsSkeleton() {
    MAIN PAGE: MyBookings
    ───────────────────────────────────────────────────────────────────────────── */
 export function MyBookings() {
-  const currentUser = useSelector((state: RootState) => state.auth.user);
-
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Dev testing toggle: easily switch between mock data, empty state, and live API
-  const [testMode, setTestMode] = useState<"mock" | "empty" | "live">("mock");
+  const fetchBookings = useCallback(async () => {
+    setIsLoading(true);
+    setErrorMessage("");
 
-  // Load real API bookings when in live mode or mounted
-  useEffect(() => {
-    let isCancelled = false;
-
-    async function fetchBookings() {
-      setIsLoading(true);
-      setErrorMessage("");
-
-      try {
-        const liveBookings = await getMyBookings();
-        if (!isCancelled) {
-          setBookings(liveBookings);
-        }
-      } catch (error) {
-        if (!isCancelled) {
-          setErrorMessage(getBookingErrorMessage(error));
-        }
-      } finally {
-        if (!isCancelled) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    if (testMode === "live") {
-      void fetchBookings();
-    } else {
+    try {
+      const liveBookings = await getMyBookings();
+      setBookings(liveBookings);
+    } catch (error) {
+      setErrorMessage(getBookingErrorMessage(error));
+    } finally {
       setIsLoading(false);
     }
+  }, []);
 
-    return () => {
-      isCancelled = true;
-    };
-  }, [testMode]);
-
-  // Determine active displayed bookings based on test mode
-  const displayedBookings =
-    testMode === "mock"
-      ? MOCK_BOOKINGS
-      : testMode === "empty"
-        ? []
-        : bookings;
-
-  const totalCount = displayedBookings.length;
+  useEffect(() => {
+    void fetchBookings();
+  }, [fetchBookings]);
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100 sm:px-6 lg:px-8">
@@ -450,94 +346,70 @@ export function MyBookings() {
             </p>
           </div>
 
-          {/* Right Header Stats & UI Test Switcher */}
+          {/* Right Header Stats & Refresh Action */}
           <div className="flex flex-wrap items-center gap-3">
-            {/* Interactive Preview Switcher (Allows instant UI inspection) */}
-            <div
-              className="inline-flex rounded-xl border border-slate-200 bg-white p-1 text-xs font-semibold shadow-sm dark:border-slate-800 dark:bg-slate-900"
-              role="group"
-              aria-label="Preview display mode"
+            {/* Refresh Button */}
+            <button
+              type="button"
+              onClick={() => void fetchBookings()}
+              disabled={isLoading}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+              title="Refresh bookings"
             >
-              <button
-                type="button"
-                onClick={() => setTestMode("mock")}
-                className={`rounded-lg px-2.5 py-1.5 transition ${
-                  testMode === "mock"
-                    ? "bg-teal-600 text-white shadow-sm"
-                    : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+              <RefreshCw
+                className={`h-4 w-4 text-teal-600 dark:text-teal-400 ${
+                  isLoading ? "animate-spin" : ""
                 }`}
-                title="View mock cards in 3-column responsive grid"
-              >
-                Mock Grid ({MOCK_BOOKINGS.length})
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setTestMode("empty")}
-                className={`rounded-lg px-2.5 py-1.5 transition ${
-                  testMode === "empty"
-                    ? "bg-teal-600 text-white shadow-sm"
-                    : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-                }`}
-                title="Test the Empty State scenario"
-              >
-                Empty State
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setTestMode("live")}
-                className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 transition ${
-                  testMode === "live"
-                    ? "bg-teal-600 text-white shadow-sm"
-                    : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-                }`}
-                title="Fetch from live Natours backend API"
-              >
-                <RefreshCw
-                  className={`h-3 w-3 ${isLoading ? "animate-spin" : ""}`}
-                />
-                Live API
-              </button>
-            </div>
+              />
+              <span>Refresh</span>
+            </button>
 
             {/* Total Badge */}
             <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <span className="text-slate-500 dark:text-slate-400">Total:</span>
               <span className="font-bold text-teal-600 dark:text-teal-400">
-                {totalCount} {totalCount === 1 ? "tour" : "tours"}
+                {bookings.length} {bookings.length === 1 ? "tour" : "tours"}
               </span>
             </div>
           </div>
         </header>
 
-        {/* ── Error Banner (if Live API fails) ── */}
-        {errorMessage && testMode === "live" && (
+        {/* ── Error Banner ── */}
+        {errorMessage && (
           <div
             role="alert"
-            className="mb-8 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 shadow-sm dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300"
+            className="mb-8 flex items-start justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 shadow-sm dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300"
           >
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-            <div>
-              <p className="font-bold">Failed to load bookings</p>
-              <p className="mt-0.5 text-xs text-rose-600 dark:text-rose-400">
-                {errorMessage}
-              </p>
+            <div className="flex items-start gap-3">
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+              <div>
+                <p className="font-bold">Failed to load bookings</p>
+                <p className="mt-0.5 text-xs text-rose-600 dark:text-rose-400">
+                  {errorMessage}
+                </p>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={() => void fetchBookings()}
+              className="rounded-lg bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-800 transition hover:bg-rose-200 dark:bg-rose-500/20 dark:text-rose-200 dark:hover:bg-rose-500/30"
+            >
+              Try Again
+            </button>
           </div>
         )}
 
         {/* ── Content Area: Loading / Empty / Grid ── */}
-        {isLoading && testMode === "live" ? (
+        {isLoading ? (
           <BookingsSkeleton />
-        ) : displayedBookings.length === 0 ? (
+        ) : bookings.length === 0 ? (
           <EmptyBookingsState />
         ) : (
           <section
             aria-label="Booked tours list"
             className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3"
           >
-            {displayedBookings.map((booking) => (
+            {bookings.map((booking) => (
               <BookingCard key={booking._id} booking={booking} />
             ))}
           </section>
