@@ -101,7 +101,7 @@ function AboutUs() {
 
           <div className="mt-7 border-t border-slate-200 pt-6 dark:border-slate-700">
             <Link
-              to="/tours"
+              to="/"
               className="group inline-flex items-center gap-2 text-sm font-semibold text-teal-700 transition hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300"
             >
               Find a tour
