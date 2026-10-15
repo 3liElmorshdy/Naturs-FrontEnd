@@ -9,10 +9,11 @@ import Layout from "../layout/Layout";
 
 import { ADMIN_ROLES, MONTHLY_PLAN_ROLES, ROLES, type Role } from "../constants/roles";
 
+import Login from "../pages/Login/Login";
+import Signup from "../pages/Signup/Signup";
+
 // Public pages
 const Home = lazy(() => import("../pages/Home/Home"));
-const Login = lazy(() => import("../pages/Login/Login"));
-const Signup = lazy(() => import("../pages/Signup/Signup"));
 const VerifyEmail = lazy(() => import("../pages/VerifyEmail/VerifyEmail"));
 const ForgetPass = lazy(() => import("../pages/ForgetPass/ForgetPass"));
 const ResetPass = lazy(() => import("../pages/ResetPass/ResetPass"));

@@ -1,13 +1,10 @@
-import { Loader2 } from "lucide-react";
 import touristIcon from "../../assets/tourist-svgrepo-com.svg";
 
 type PageLoaderProps = {
-  message?: string;
   minHeight?: string;
 };
 
 export default function PageLoader({
-  // message = "Loading...",
   minHeight = "min-h-[50vh]",
 }: PageLoaderProps) {
   return (
@@ -36,16 +33,7 @@ export default function PageLoader({
             />
           </div>
         </div>
-
-        {/* Informative text & subtle spinner */}
-        <div className="mt-5 flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin text-teal-600 dark:text-teal-400" />
-          {/* <span className="text-sm font-medium tracking-wide text-slate-600 dark:text-slate-300">
-            {message}
-          </span> */}
-        </div>
       </div>
-      <span className="sr-only">Loading content, please wait...</span>
     </div>
   );
 }

@@ -139,6 +139,7 @@ const Login: React.FC = () => {
               type="submit"
               variant="primary"
               disabled={isSubmitting}
+              isLoading={isSubmitting}
               className="mt-2 w-full shadow-md active:scale-95"
             >
               {isSubmitting ? "Logging in..." : "Login"}
