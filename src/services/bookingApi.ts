@@ -21,9 +21,20 @@ const bookedTourSchema = z.object({
     .optional(),
 });
 
+export const bookingUserSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  email: z.string().optional(),
+  photo: z.string().optional(),
+  role: z.string().optional(),
+});
+
+export type BookingUser = z.infer<typeof bookingUserSchema>;
+
 export const bookingSchema = z.object({
   _id: z.string(),
-  tour: bookedTourSchema.nullable(),
+  tour: bookedTourSchema.nullable().optional(),
+  user: z.union([bookingUserSchema, z.string()]).nullable().optional(),
   price: z.number(),
   createdAt: z.string(),
   paid: z.boolean(),
@@ -35,6 +46,13 @@ const myBookingsResponseSchema = z.object({
   results: z.number(),
   data: z.object({
     data: z.array(bookingSchema),
+  }),
+});
+
+const singleBookingResponseSchema = z.object({
+  status: z.literal("success"),
+  data: z.object({
+    data: bookingSchema,
   }),
 });
 
@@ -56,6 +74,63 @@ export async function getMyBookings(
     throw new Error(
       "The server returned unexpected booking data. Please try again.",
     );
+  }
+
+  return result.data.data.data;
+}
+
+export async function getAllBookings(
+  signal?: AbortSignal,
+): Promise<Booking[]> {
+  const response = await api.get<unknown>(
+    "/bookings",
+    signal ? { signal } : undefined,
+  );
+
+  const result = myBookingsResponseSchema.safeParse(response.data);
+
+  if (!result.success) {
+    console.error("Invalid all-bookings response:", result.error.issues);
+
+    throw new Error(
+      "The server returned unexpected booking data. Please try again.",
+    );
+  }
+
+  return result.data.data.data;
+}
+
+export async function deleteBooking(id: string): Promise<void> {
+  await api.delete(`/bookings/${id}`);
+}
+
+export async function updateBooking(
+  id: string,
+  payload: { paid?: boolean; price?: number },
+): Promise<Booking> {
+  const response = await api.patch<unknown>(`/bookings/${id}`, payload);
+  const result = singleBookingResponseSchema.safeParse(response.data);
+
+  if (!result.success) {
+    console.error("Invalid update booking response:", result.error.issues);
+    throw new Error("Failed to update booking. Please try again.");
+  }
+
+  return result.data.data.data;
+}
+
+export async function createBooking(payload: {
+  tour: string;
+  user: string;
+  price: number;
+  paid?: boolean;
+}): Promise<Booking> {
+  const response = await api.post<unknown>("/bookings", payload);
+  const result = singleBookingResponseSchema.safeParse(response.data);
+
+  if (!result.success) {
+    console.error("Invalid create booking response:", result.error.issues);
+    throw new Error("Failed to create booking. Please try again.");
   }
 
   return result.data.data.data;

@@ -26,6 +26,7 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminUsers from "../pages/admin/AdminUsers";
 import ManageTours from "../pages/admin/ManageTours/ManageTours";
 import MonthlyPlan from "../pages/admin/MonthlyPlan/MonthlyPlan";
+import AdminBookings from "../pages/admin/AdminBookings";
 
 const router = createBrowserRouter([
   {
@@ -151,6 +152,22 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={MONTHLY_PLAN_ROLES}>
             <MonthlyPlan />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "bookings",
+        element: (
+          <ProtectedRoute allowedRoles={ADMIN_ROLES}>
+            <AdminBookings />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admin/bookings",
+        element: (
+          <ProtectedRoute allowedRoles={ADMIN_ROLES}>
+            <AdminBookings />
           </ProtectedRoute>
         ),
       },

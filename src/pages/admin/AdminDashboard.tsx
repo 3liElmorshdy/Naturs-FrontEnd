@@ -153,7 +153,7 @@ function AdminDashboard() {
               </Link>
             )}
 
-            {isCurrentUserAdmin && (
+            {(isCurrentUserAdmin || canManageCurrentUserTours) && (
               <Link
                 to="/bookings"
                 className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-amber-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-amber-500/50 dark:focus-visible:ring-offset-slate-900"
