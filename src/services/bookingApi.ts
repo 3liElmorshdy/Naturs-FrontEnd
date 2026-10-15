@@ -1,6 +1,7 @@
 import axios from "axios";
 import { z } from "zod";
 import api from "./api";
+import toast from "react-hot-toast";
 
 const bookedTourSchema = z.object({
   _id: z.string(),
@@ -69,7 +70,8 @@ export async function getMyBookings(
   const result = myBookingsResponseSchema.safeParse(response.data);
 
   if (!result.success) {
-    console.error("Invalid bookings response:", result.error.issues);
+    // console.error("Invalid bookings response:", result.error.issues);
+    toast.error("Please sign in to view your bookings.")
 
     throw new Error(
       "The server returned unexpected booking data. Please try again.",
@@ -90,7 +92,8 @@ export async function getAllBookings(
   const result = myBookingsResponseSchema.safeParse(response.data);
 
   if (!result.success) {
-    console.error("Invalid all-bookings response:", result.error.issues);
+    // console.error("Invalid all-bookings response:", result.error.issues);
+    toast.error("Unable to load bookings. Please try again.");
 
     throw new Error(
       "The server returned unexpected booking data. Please try again.",
@@ -112,7 +115,8 @@ export async function updateBooking(
   const result = singleBookingResponseSchema.safeParse(response.data);
 
   if (!result.success) {
-    console.error("Invalid update booking response:", result.error.issues);
+    // console.error("Invalid update booking response:", result.error.issues);
+    toast.error(result.error.message);
     throw new Error("Failed to update booking. Please try again.");
   }
 
@@ -129,7 +133,8 @@ export async function createBooking(payload: {
   const result = singleBookingResponseSchema.safeParse(response.data);
 
   if (!result.success) {
-    console.error("Invalid create booking response:", result.error.issues);
+    // console.error("Invalid create booking response:", result.error.issues);
+    toast.error(result.error.message);
     throw new Error("Failed to create booking. Please try again.");
   }
 

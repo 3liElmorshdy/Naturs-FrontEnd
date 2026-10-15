@@ -37,7 +37,7 @@ export function TourBookingCard({
         window.location.href = res.data.session.url;
       }
     } catch (err: any) {
-      console.error("Booking error:", err.response?.data || err.message);
+      // console.error("Booking error:", err.response?.data || err.message);
       toast.error(err.response?.data?.message || err.message);
 
       setBooking(false);

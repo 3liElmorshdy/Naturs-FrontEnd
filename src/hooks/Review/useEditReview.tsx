@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../../services/api";
 import type Review from "../../types/Review";
 import type { Rating } from "../../types/Review";
+import toast from "react-hot-toast";
 interface UpdateReviewParams {
   reviewId: string;
   tourId: string;
@@ -49,11 +50,12 @@ export function useEditReview() {
         }),
       ]);
 
-      console.log("Review updated:", updatedReview._id);
+      // console.log("Review updated:", updatedReview._id);
     },
 
-    onError: (error) => {
-      console.error("Failed to update review:", error);
+    onError: (error: any) => {
+      // console.error("Failed to update review:", error);
+      toast.error(error.message || "Failed to update review");
     },
   });
 }

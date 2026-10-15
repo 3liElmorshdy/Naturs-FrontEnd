@@ -48,7 +48,7 @@ export const useSignup = () => {
         setRegisteredEmail(data.email);
       }
     } catch (err: any) {
-      console.error("Signup error:", err.response?.data);
+      // console.error("Signup error:", err.response?.data);
 
       const status = err.response?.status;
       const message =

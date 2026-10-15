@@ -78,7 +78,7 @@ export const useGoogleAuth = () => {
 
         navigate('/', { replace: true });
       } catch (err: any) {
-        console.log('GOOGLE AUTH ERROR:', err.response?.data || err.message);
+        // console.log('GOOGLE AUTH ERROR:', err.response?.data || err.message);
         setAccessToken(null);
         sessionStorage.removeItem('google_auth_action');
         toast.error(
