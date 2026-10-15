@@ -7,7 +7,7 @@ import type { Role } from "../../constants/roles";
 
 type ProtectedRouteProps = {
   children: ReactNode;
-  allowedRoles?: readonly Role[];
+  allowedRoles?: readonly Role[] | undefined;
 };
 
 function ProtectedRoute({

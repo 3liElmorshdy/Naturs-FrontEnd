@@ -1,3 +1,4 @@
+import { lazy, type ReactNode } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
@@ -6,37 +7,51 @@ import Unauthorized from "../components/Unauthorized/Unauthorized";
 
 import Layout from "../layout/Layout";
 
-import { ADMIN_ROLES, MONTHLY_PLAN_ROLES, ROLES } from "../constants/roles";
+import { ADMIN_ROLES, MONTHLY_PLAN_ROLES, ROLES, type Role } from "../constants/roles";
 
-import Home from "../pages/Home/Home";
-import Login from "../pages/Login/Login";
-import Signup from "../pages/Signup/Signup";
-import VerifyEmail from "../pages/VerifyEmail/VerifyEmail";
-import ForgetPass from "../pages/ForgetPass/ForgetPass";
-import ResetPass from "../pages/ResetPass/ResetPass";
-import GoogleCallback from "../pages/GoogleCallback/GoogleCallback";
-import ViewDetails from "../pages/ViewDetails/ViewDetails";
-import MyBooking from "../pages/MyBooking/MyBooking";
-import Profile from "../pages/Profile/Profile";
-import ConfirmEmailChange from "../pages/ConfirmEmailChange/ConfirmEmailChange";
-import AboutUs from "../pages/AboutUs/AboutUs";
-import { ContactUs } from "../pages/ContactUs/ContactUs";
+// Public pages
+const Home = lazy(() => import("../pages/Home/Home"));
+const Login = lazy(() => import("../pages/Login/Login"));
+const Signup = lazy(() => import("../pages/Signup/Signup"));
+const VerifyEmail = lazy(() => import("../pages/VerifyEmail/VerifyEmail"));
+const ForgetPass = lazy(() => import("../pages/ForgetPass/ForgetPass"));
+const ResetPass = lazy(() => import("../pages/ResetPass/ResetPass"));
+const GoogleCallback = lazy(() => import("../pages/GoogleCallback/GoogleCallback"));
+const ViewDetails = lazy(() => import("../pages/ViewDetails/ViewDetails"));
+const ConfirmEmailChange = lazy(() =>
+  import("../pages/ConfirmEmailChange/ConfirmEmailChange")
+);
+const AboutUs = lazy(() => import("../pages/AboutUs/AboutUs"));
 
-import AdminDashboard from "../pages/admin/AdminDashboard";
-import AdminUsers from "../pages/admin/AdminUsers";
-import ManageTours from "../pages/admin/ManageTours/ManageTours";
-import MonthlyPlan from "../pages/admin/MonthlyPlan/MonthlyPlan";
-import AdminBookings from "../pages/admin/AdminBookings";
+// ContactUs is a named export
+const ContactUs = lazy(() =>
+  import("../pages/ContactUs/ContactUs").then((m) => ({ default: m.ContactUs }))
+);
+
+// Authenticated pages
+const MyBooking = lazy(() => import("../pages/MyBooking/MyBooking"));
+const Profile = lazy(() => import("../pages/Profile/Profile"));
+
+// Admin pages
+const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
+const AdminUsers = lazy(() => import("../pages/admin/AdminUsers"));
+const ManageTours = lazy(() => import("../pages/admin/ManageTours/ManageTours"));
+const MonthlyPlan = lazy(() => import("../pages/admin/MonthlyPlan/MonthlyPlan"));
+const AdminBookings = lazy(() => import("../pages/admin/AdminBookings"));
+
+const protectedRoute = (
+  element: ReactNode,
+  allowedRoles?: readonly Role[]
+) => (
+  <ProtectedRoute allowedRoles={allowedRoles}>{element}</ProtectedRoute>
+);
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
     children: [
-      {
-        index: true,
-        element: <Home />,
-      },
+      { index: true, element: <Home /> },
 
       {
         path: "login",
@@ -46,7 +61,6 @@ const router = createBrowserRouter([
           </GuestRoute>
         ),
       },
-
       {
         path: "signup",
         element: (
@@ -56,120 +70,35 @@ const router = createBrowserRouter([
         ),
       },
 
-      {
-        path: "unauthorized",
-        element: <Unauthorized />,
-      },
+      { path: "unauthorized", element: <Unauthorized /> },
+      { path: "forgot-password", element: <ForgetPass /> },
+      { path: "reset-password/:token", element: <ResetPass /> },
+      { path: "verify-email/:token", element: <VerifyEmail /> },
+      { path: "confirm-email-change/:token", element: <ConfirmEmailChange /> },
+      { path: "auth/google/callback", element: <GoogleCallback /> },
+      { path: "tours/:slug", element: <ViewDetails /> },
+      { path: "contact", element: <ContactUs /> },
+      { path: "about", element: <AboutUs /> },
 
-      {
-        path: "forgot-password",
-        element: <ForgetPass />,
-      },
+      // Authenticated
+      { path: "my-bookings", element: protectedRoute(<MyBooking />) },
+      { path: "profile", element: protectedRoute(<Profile />) },
 
-      {
-        path: "reset-password/:token",
-        element: <ResetPass />,
-      },
-
-      {
-        path: "verify-email/:token",
-        element: <VerifyEmail />,
-      },
-
-      {
-        path: "confirm-email-change/:token",
-        element: <ConfirmEmailChange />,
-      },
-
-      {
-        path: "auth/google/callback",
-        element: <GoogleCallback />,
-      },
-
-      {
-        path: "tours/:slug",
-        element: <ViewDetails />,
-      },
-
-      {
-        path: "contact",
-        element: <ContactUs />,
-      },
-
-      {
-        path: "about",
-        element: <AboutUs />,
-      },
-
-
-
-      {
-        path: "my-bookings",
-        element: (
-          <ProtectedRoute>
-            <MyBooking />
-          </ProtectedRoute>
-        ),
-      },
-
-      {
-        path: "profile",
-        element: (
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        ),
-      },
-
-      {
-        path: "admin",
-        element: (
-          <ProtectedRoute allowedRoles={ADMIN_ROLES}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        ),
-      },
-
+      // Admin / staff
+      { path: "admin", element: protectedRoute(<AdminDashboard />, ADMIN_ROLES) },
       {
         path: "admin/users",
-        element: (
-          <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-            <AdminUsers />
-          </ProtectedRoute>
-        ),
+        element: protectedRoute(<AdminUsers />, [ROLES.ADMIN]),
       },
-      {
-        path: "manage-tours",
-        element: (
-          <ProtectedRoute allowedRoles={ADMIN_ROLES}>
-            <ManageTours />
-          </ProtectedRoute>
-        ),
-      },
-
+      { path: "manage-tours", element: protectedRoute(<ManageTours />, ADMIN_ROLES) },
       {
         path: "monthly-plan",
-        element: (
-          <ProtectedRoute allowedRoles={MONTHLY_PLAN_ROLES}>
-            <MonthlyPlan />
-          </ProtectedRoute>
-        ),
+        element: protectedRoute(<MonthlyPlan />, MONTHLY_PLAN_ROLES),
       },
-      {
-        path: "bookings",
-        element: (
-          <ProtectedRoute allowedRoles={ADMIN_ROLES}>
-            <AdminBookings />
-          </ProtectedRoute>
-        ),
-      },
+      { path: "bookings", element: protectedRoute(<AdminBookings />, ADMIN_ROLES) },
       {
         path: "admin/bookings",
-        element: (
-          <ProtectedRoute allowedRoles={ADMIN_ROLES}>
-            <AdminBookings />
-          </ProtectedRoute>
-        ),
+        element: protectedRoute(<AdminBookings />, ADMIN_ROLES),
       },
     ],
   },
