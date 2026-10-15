@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import type { RootState } from "../../store/store";
 import api from "../../services/api";
+import toast from "react-hot-toast";
 
 interface TourBookingCardProps {
   tour: Tour;
@@ -37,7 +38,8 @@ export function TourBookingCard({
       }
     } catch (err: any) {
       console.error("Booking error:", err.response?.data || err.message);
-      alert("Error: " + (err.response?.data?.message || err.message));
+      toast.error(err.response?.data?.message || err.message);
+
       setBooking(false);
     }
   };
