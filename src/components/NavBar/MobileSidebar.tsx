@@ -1,5 +1,6 @@
 import {
   Calendar,
+  Download,
   Compass,
   Heart,
   Info,
@@ -18,6 +19,7 @@ import { Link, NavLink } from "react-router-dom";
 import type User from "../../types/User";
 import Avatar from "../Avatar/Avatar";
 import Logo from "../Logo/Logo";
+import { usePWAInstall } from "../../hooks/usePWAInstall";
 
 type MobileSidebarProps = {
   isOpen: boolean;
@@ -36,6 +38,7 @@ export function MobileSidebar({
   canOpenDashboard = false,
   canManageTours = false,
 }: MobileSidebarProps) {
+  const { isInstallable, installApp } = usePWAInstall();
   // Prevent body scrolling when sidebar drawer is open
   useEffect(() => {
     if (isOpen) {
@@ -233,20 +236,33 @@ export function MobileSidebar({
           )}
         </div>
 
-        {/* Drawer Footer (Sign out) */}
-        {user && (
-          <div className="shrink-0 border-t border-slate-100 p-4 dark:border-slate-800 mt-auto">
-            <button
-              type="button"
-              onClick={() => {
-                onClose();
-                onLogout();
-              }}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-rose-50 py-3 text-sm font-bold text-rose-600 transition hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Sign out</span>
-            </button>
+        {/* Drawer Footer (PWA Install & Sign out) */}
+        {(isInstallable || user) && (
+          <div className="shrink-0 border-t border-slate-100 p-4 dark:border-slate-800 mt-auto space-y-2">
+            {isInstallable && (
+              <button
+                type="button"
+                onClick={installApp}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-600 px-4 py-3 text-sm font-bold text-white shadow-md hover:bg-teal-700 transition"
+              >
+                <Download className="h-4 w-4" />
+                <span>تثبيت التطبيق (Install App)</span>
+              </button>
+            )}
+
+            {user && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onLogout();
+                }}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-rose-50 py-3 text-sm font-bold text-rose-600 transition hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Sign out</span>
+              </button>
+            )}
           </div>
         )}
       </div>
