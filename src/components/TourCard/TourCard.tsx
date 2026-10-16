@@ -55,6 +55,17 @@ export function TourCard({
   const isInWishlist = itemIds.includes(tour._id);
   const isToggling = togglingId === tour._id;
 
+  const tourSlug =
+    tour.slug ||
+    (tour.name
+      ? tour.name
+          .toLowerCase()
+          .trim()
+          .replace(/[^\w\s-]/g, "")
+          .replace(/[\s_-]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+      : tour._id);
+
   const [imageSrc, setImageSrc] = useState(() =>
     getTourImageUrl(tour.imageCover),
   );
@@ -259,7 +270,7 @@ export function TourCard({
         {/* CTA Section: View Details Button & Add to Wishlist Heart Button */}
         <div className="mt-1 flex items-center gap-2">
           <Link
-            to={`/tours/${tour.slug}`}
+            to={`/tours/${tourSlug}`}
             className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-teal-800 hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
           >
             <span>View Details</span>
