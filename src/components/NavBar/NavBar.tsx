@@ -45,11 +45,11 @@ export function NavBar() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-6">
           {/* Left: Brand Logo & Desktop Navigation */}
-          <div className="flex min-w-0 items-center gap-8">
+          <div className="flex min-w-0 items-center gap-4 xl:gap-8">
             <Logo />
 
             <nav
-              className="hidden items-center gap-7 md:flex"
+              className="hidden items-center gap-5 xl:gap-7 lg:flex"
               aria-label="Primary navigation"
             >
               <NavLink to="/" end className={desktopLinkClassName}>
@@ -65,15 +65,9 @@ export function NavBar() {
               </NavLink>
 
               {user && (
-                <>
-                  <NavLink to="/my-bookings" className={desktopLinkClassName}>
-                    My Bookings
-                  </NavLink>
-
-                  <NavLink to="/wishlist" className={desktopLinkClassName}>
-                    Wishlist
-                  </NavLink>
-                </>
+                <NavLink to="/my-bookings" className={desktopLinkClassName}>
+                  My Bookings
+                </NavLink>
               )}
 
               {canOpenDashboard && (
@@ -85,7 +79,7 @@ export function NavBar() {
           </div>
 
           {/* Right: Wishlist Icon / User Avatar / Theme Toggle & Mobile Hamburger */}
-          <div className="flex shrink-0 items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             {/* Wishlist Icon Button with Badge */}
             {user && (
               <NavLink
@@ -109,11 +103,11 @@ export function NavBar() {
               </NavLink>
             )}
 
-            {/* User Account Menu (Direct Link on Mobile, Dropdown on Desktop) */}
+            {/* User Account Menu (Direct Link on Mobile/Tablet, Dropdown on Desktop) */}
             {user ? (
               <UserAccountMenu user={user} onLogout={handleLogout} />
             ) : (
-              <div className="hidden items-center gap-3 md:flex">
+              <div className="hidden items-center gap-3 lg:flex">
                 <Button to="/login" variant="secondary">
                   Login
                 </Button>
@@ -127,12 +121,11 @@ export function NavBar() {
             {/* Dark / Light Theme Toggle */}
             <ThemeToggle />
 
-
-            {/* Mobile Hamburger Button (Drawer trigger) */}
+            {/* Mobile / Tablet Hamburger Button (Drawer trigger) */}
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(true)}
-              className="rounded-xl p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500 md:hidden dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+              className="rounded-xl p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500 lg:hidden dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
               aria-label="Open mobile menu"
               aria-expanded={isMobileMenuOpen}
             >

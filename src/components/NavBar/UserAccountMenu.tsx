@@ -24,8 +24,8 @@ export function UserAccountMenu({ user, onLogout }: UserAccountMenuProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Desktop detection: md screens (>= 768px)
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  // Desktop detection: lg screens (>= 1024px)
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   const isAdmin = user.role === "admin";
   const isLeadGuide = user.role === "lead-guide";
@@ -106,7 +106,7 @@ export function UserAccountMenu({ user, onLogout }: UserAccountMenuProps) {
       >
         <Avatar src={user.photo} name={user.name} size="md" />
 
-        <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+        <span className="hidden xl:inline max-w-[120px] truncate text-sm font-semibold text-slate-700 dark:text-slate-200">
           {firstName}
         </span>
 

@@ -72,7 +72,7 @@ export function MobileSidebar({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] md:hidden"
+      className="fixed inset-0 z-[100] lg:hidden"
       role="dialog"
       aria-modal="true"
       aria-label="Mobile Navigation"
