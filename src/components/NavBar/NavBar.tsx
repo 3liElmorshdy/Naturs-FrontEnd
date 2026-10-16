@@ -1,4 +1,4 @@
-import { Menu } from "lucide-react";
+import { Heart, Menu } from "lucide-react";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
@@ -19,6 +19,10 @@ export function NavBar() {
   const user = useSelector(
     (state: RootState) => state.auth.user,
   ) as User | null;
+
+  const wishlistCount = useSelector(
+    (state: RootState) => state.wishlist.itemIds.length,
+  );
 
   const handleLogout = useLogout();
 
@@ -61,9 +65,15 @@ export function NavBar() {
               </NavLink>
 
               {user && (
-                <NavLink to="/my-bookings" className={desktopLinkClassName}>
-                  My Bookings
-                </NavLink>
+                <>
+                  <NavLink to="/my-bookings" className={desktopLinkClassName}>
+                    My Bookings
+                  </NavLink>
+
+                  <NavLink to="/wishlist" className={desktopLinkClassName}>
+                    Wishlist
+                  </NavLink>
+                </>
               )}
 
               {canOpenDashboard && (
@@ -74,8 +84,31 @@ export function NavBar() {
             </nav>
           </div>
 
-          {/* Right: User Avatar / Account Controls & Mobile Hamburger */}
+          {/* Right: Wishlist Icon / User Avatar / Theme Toggle & Mobile Hamburger */}
           <div className="flex shrink-0 items-center gap-3">
+            {/* Wishlist Icon Button with Badge */}
+            {user && (
+              <NavLink
+                to="/wishlist"
+                className={({ isActive }) =>
+                  `relative flex items-center justify-center rounded-xl p-2 transition ${
+                    isActive
+                      ? "bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-rose-600 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-rose-400"
+                  }`
+                }
+                title="My Wishlist"
+                aria-label="My Wishlist"
+              >
+                <Heart className="h-5 w-5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-slate-900">
+                    {wishlistCount}
+                  </span>
+                )}
+              </NavLink>
+            )}
+
             {/* User Account Menu (Direct Link on Mobile, Dropdown on Desktop) */}
             {user ? (
               <UserAccountMenu user={user} onLogout={handleLogout} />
@@ -93,6 +126,7 @@ export function NavBar() {
 
             {/* Dark / Light Theme Toggle */}
             <ThemeToggle />
+
 
             {/* Mobile Hamburger Button (Drawer trigger) */}
             <button

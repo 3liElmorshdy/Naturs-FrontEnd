@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import api, { setAccessToken } from '../../services/api';
 import { logoutUser } from '../../store/authSlice';
+import { resetWishlist } from '../../store/wishlistSlice';
 
 export const useLogout = () => {
   const dispatch = useDispatch();
@@ -15,8 +16,9 @@ export const useLogout = () => {
     } finally {
       // 2. امسح الـ accessToken من الـ memory
       setAccessToken(null);
-      // 3. امسح الـ user من الـ Redux وlocalStorage
+      // 3. امسح الـ user والـ wishlist من الـ Redux وlocalStorage
       dispatch(logoutUser());
+      dispatch(resetWishlist());
     }
   }, [dispatch]);
-};
+};

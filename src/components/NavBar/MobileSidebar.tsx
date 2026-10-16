@@ -1,6 +1,7 @@
 import {
   Calendar,
   Compass,
+  Heart,
   Info,
   LayoutDashboard,
   LogOut,
@@ -9,6 +10,7 @@ import {
   User as UserIcon,
   X,
 } from "lucide-react";
+
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Link, NavLink } from "react-router-dom";
@@ -176,6 +178,16 @@ export function MobileSidebar({
                   <Calendar className="h-4 w-4" />
                   <span>My Bookings</span>
                 </NavLink>
+
+                <NavLink
+                  to="/wishlist"
+                  onClick={onClose}
+                  className={linkClassName}
+                >
+                  <Heart className="h-4 w-4 text-rose-500" />
+                  <span>My Wishlist</span>
+                </NavLink>
+
 
                 {canOpenDashboard && (
                   <NavLink

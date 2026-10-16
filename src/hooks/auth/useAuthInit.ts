@@ -2,7 +2,9 @@ import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import api, { refreshAccessToken, setAccessToken } from '../../services/api';
 import { setUser, logoutUser } from '../../store/authSlice';
+import { fetchWishlist } from '../../store/wishlistSlice';
 import type { AppDispatch } from '../../store/store';
+
 
 export const useAuthInit = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -19,8 +21,11 @@ export const useAuthInit = () => {
         // 2. هات بيانات اليوزر
         const res = await api.get('/users/me');
         const user = res.data?.data?.data;
-        if (user) dispatch(setUser(user));
-        else throw new Error('No user');
+        if (user) {
+          dispatch(setUser(user));
+          void dispatch(fetchWishlist());
+        } else throw new Error('No user');
+
       } catch {
         setAccessToken(null);
         dispatch(logoutUser());

@@ -31,7 +31,9 @@ const ContactUs = lazy(() =>
 
 // Authenticated pages
 const MyBooking = lazy(() => import("../pages/MyBooking/MyBooking"));
+const Wishlist = lazy(() => import("../pages/Wishlist/Wishlist"));
 const Profile = lazy(() => import("../pages/Profile/Profile"));
+
 
 // Admin pages
 const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
@@ -83,7 +85,9 @@ const router = createBrowserRouter([
 
       // Authenticated
       { path: "my-bookings", element: protectedRoute(<MyBooking />) },
+      { path: "wishlist", element: protectedRoute(<Wishlist />) },
       { path: "profile", element: protectedRoute(<Profile />) },
+
 
       // Admin / staff
       { path: "admin", element: protectedRoute(<AdminDashboard />, ADMIN_ROLES) },

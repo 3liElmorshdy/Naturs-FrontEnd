@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Heart } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import toast from "react-hot-toast";
+
 import type Tour from "../../types/Tour";
 import { formatDistance } from "../../utils/formatDistance";
 import type { DistanceUnit } from "../../utils/formatDistance";
 import { API_ORIGIN as API_URL } from "../../config";
+import type { AppDispatch, RootState } from "../../store/store";
+import { toggleWishlist } from "../../store/wishlistSlice";
 
 const TOURS_IMAGE_BASE = `${API_URL}/img/tours/`;
 const FALLBACK_IMAGE =
@@ -22,19 +28,16 @@ export const getTourImageUrl = (imageCover?: string) => {
 
   // Cloudinary أو أي رابط خارجي كامل
   if (imageCover.startsWith("http://") || imageCover.startsWith("https://")) {
-    // تحسين سحابي تلقائي: صيغة WebP/AVIF، ضغط ذكي، وتحديد العرض لـ 500px لتقليل حجم الصورة من ميجابايت إلى كيلوبايت معدودة
     if (imageCover.includes("/upload/")) {
       return imageCover.replace("/upload/", "/upload/f_auto,q_auto,w_500/");
     }
     return imageCover;
   }
 
-  // لو الـ backend رجّع /img/tours/tour-1-cover.jpg
   if (imageCover.startsWith("/")) {
     return `${API_URL}${imageCover}`;
   }
 
-  // لو الـ backend رجّع tour-1-cover.jpg
   return `${TOURS_IMAGE_BASE}${imageCover}`;
 };
 
@@ -43,6 +46,15 @@ export function TourCard({
   distance,
   distanceUnit = "mi",
 }: TourCardProps) {
+  const dispatch = useDispatch<AppDispatch>();
+  const user = useSelector((state: RootState) => state.auth.user);
+  const { itemIds, togglingId } = useSelector(
+    (state: RootState) => state.wishlist,
+  );
+
+  const isInWishlist = itemIds.includes(tour._id);
+  const isToggling = togglingId === tour._id;
+
   const [imageSrc, setImageSrc] = useState(() =>
     getTourImageUrl(tour.imageCover),
   );
@@ -64,10 +76,21 @@ export function TourCard({
     "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300";
 
   const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
-    // يمنع محاولة تحميل fallback بلا نهاية لو فشلت هي كمان
     if (event.currentTarget.src !== FALLBACK_IMAGE) {
       setImageSrc(FALLBACK_IMAGE);
     }
+  };
+
+  const handleWishlistClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      toast.error("Please sign in to add tours to your wishlist");
+      return;
+    }
+
+    void dispatch(toggleWishlist(tour));
   };
 
   return (
@@ -93,7 +116,7 @@ export function TourCard({
           {tour.difficulty}
         </span>
 
-        {/* سعر الرحلة مع خلفية teal-700 لتحقيق أعلى معايير تباين الألوان (Accessibility) */}
+        {/* سعر الرحلة مع خلفية teal-700 لتحقيق أعلى معايير تباين الألوان */}
         <div className="absolute right-3 top-3 rounded-full bg-teal-700 px-3 py-1 text-sm font-bold text-white shadow">
           ${tour.price}
         </div>
@@ -121,7 +144,6 @@ export function TourCard({
       {/* Card body */}
       <div className="flex flex-1 flex-col gap-4 p-5">
         <div>
-          {/* تحويل العنوان إلى h2 لسلامة التسلسل الهيكلي للعناوين وتجنب أخطاء SEO و Accessibility */}
           <h2 className="mb-1.5 line-clamp-2 text-lg font-extrabold leading-snug text-slate-800 dark:text-white">
             {tour.name}
           </h2>
@@ -232,27 +254,51 @@ export function TourCard({
           </div>
         </div>
 
-        {/* استخدام bg-teal-700 لتباين ألوان مثالي متوافق مع معايير WCAG */}
-        <Link
-          to={`/tours/${tour.slug}`}
-          className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-teal-800 hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
-        >
-          View Details
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2.5}
-            aria-hidden="true"
+        {/* CTA Section: View Details Button & Add to Wishlist Heart Button */}
+        <div className="mt-1 flex items-center gap-2">
+          <Link
+            to={`/tours/${tour.slug}`}
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-teal-800 hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
+            <span>View Details</span>
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
+              />
+            </svg>
+          </Link>
+
+          {/* Add to Wishlist Heart Button */}
+          <button
+            type="button"
+            onClick={handleWishlistClick}
+            disabled={isToggling}
+            aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+            title={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-200 active:scale-90 focus:outline-none focus:ring-2 focus:ring-rose-500/50 ${
+              isInWishlist
+                ? "border-rose-300 bg-rose-50 text-rose-600 shadow-sm hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-500/20 dark:text-rose-400 dark:hover:bg-rose-500/30"
+                : "border-slate-200 bg-white text-slate-400 shadow-sm hover:border-rose-300 hover:text-rose-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-rose-800 dark:hover:text-rose-400"
+            }`}
+          >
+            <Heart
+              className={`h-5 w-5 transition-transform duration-200 ${
+                isInWishlist
+                  ? "fill-rose-500 text-rose-500 scale-110"
+                  : "hover:scale-110"
+              } ${isToggling ? "animate-pulse" : ""}`}
             />
-          </svg>
-        </Link>
+          </button>
+        </div>
       </div>
     </article>
   );
