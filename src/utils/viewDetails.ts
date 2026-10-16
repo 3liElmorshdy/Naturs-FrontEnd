@@ -6,17 +6,28 @@ export const USER_IMG = `${API_URL}/img/users/`;
 
 export const getTourImageSrc = (img?: string): string => {
   if (!img) return "";
-  if (img.startsWith("http://") || img.startsWith("https://")) return img;
+  if (img.startsWith("http://") || img.startsWith("https://")) {
+    if (img.includes("/upload/")) {
+      return img.replace("/upload/", "/upload/f_auto,q_auto,w_1200/");
+    }
+    return img;
+  }
   if (img.startsWith("/")) return `${API_URL}${img}`;
   return `${TOUR_IMG}${img}`;
 };
 
 export const getUserImageSrc = (img?: string): string => {
   if (!img || img === "default.jpg") return "";
-  if (img.startsWith("http://") || img.startsWith("https://")) return img;
+  if (img.startsWith("http://") || img.startsWith("https://")) {
+    if (img.includes("/upload/")) {
+      return img.replace("/upload/", "/upload/f_auto,q_auto,w_200,c_fill/");
+    }
+    return img;
+  }
   if (img.startsWith("/")) return `${API_URL}${img}`;
   return `${USER_IMG}${img}`;
 };
+
 
 
 

@@ -59,22 +59,27 @@ export function Avatar({
 
   const photoUrl =
     rawImage.startsWith("http://") ||
-    rawImage.startsWith("https://") ||
-    rawImage.startsWith("data:") ||
-    rawImage.startsWith("blob:")
-      ? rawImage
-      : rawImage.startsWith("/")
-        ? `${API_ORIGIN}${rawImage}`
-        : `${API_ORIGIN}/img/users/${rawImage}`;
+    rawImage.startsWith("https://")
+      ? rawImage.includes("/upload/")
+        ? rawImage.replace("/upload/", "/upload/f_auto,q_auto,w_150,c_fill/")
+        : rawImage
+      : rawImage.startsWith("data:") || rawImage.startsWith("blob:")
+        ? rawImage
+        : rawImage.startsWith("/")
+          ? `${API_ORIGIN}${rawImage}`
+          : `${API_ORIGIN}/img/users/${rawImage}`;
 
   return (
     <img
       src={photoUrl}
       alt={name}
+      loading="lazy"
+      decoding="async"
       onError={() => setImageError(true)}
       className={`shrink-0 rounded-full object-cover ring-2 ring-teal-400/40 ring-offset-1 dark:ring-offset-slate-900 ${sizeClass} ${className}`}
     />
   );
+
 }
 
 

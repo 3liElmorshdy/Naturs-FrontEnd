@@ -7,7 +7,7 @@ import { API_ORIGIN as API_URL } from "../../config";
 
 const TOURS_IMAGE_BASE = `${API_URL}/img/tours/`;
 const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1000&q=80";
+  "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=600&q=80";
 
 interface TourCardProps {
   tour: Tour;
@@ -22,6 +22,10 @@ export const getTourImageUrl = (imageCover?: string) => {
 
   // Cloudinary أو أي رابط خارجي كامل
   if (imageCover.startsWith("http://") || imageCover.startsWith("https://")) {
+    // تحسين سحابي تلقائي: صيغة WebP/AVIF، ضغط ذكي، وتحديد العرض لـ 500px لتقليل حجم الصورة من ميجابايت إلى كيلوبايت معدودة
+    if (imageCover.includes("/upload/")) {
+      return imageCover.replace("/upload/", "/upload/f_auto,q_auto,w_500/");
+    }
     return imageCover;
   }
 
@@ -51,13 +55,13 @@ export function TourCard({
   const difficultyKey = tour.difficulty || "easy";
   const diffColor =
     {
-      easy: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+      easy: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
       medium:
-        "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+        "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300",
       difficult:
-        "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
+        "bg-rose-100 text-rose-900 dark:bg-rose-950 dark:text-rose-300",
     }[difficultyKey] ||
-    "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300";
+    "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300";
 
   const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
     // يمنع محاولة تحميل fallback بلا نهاية لو فشلت هي كمان
@@ -66,14 +70,17 @@ export function TourCard({
     }
   };
 
-
   return (
-    <article className="group flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:ring-teal-400/50 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-teal-500/40">
+    <article className="group flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:ring-teal-500/50 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-teal-500/40">
       {/* Cover image */}
       <div className="relative h-56 overflow-hidden bg-slate-200 dark:bg-slate-700">
         <img
           src={imageSrc}
           alt={tour.name}
+          width={420}
+          height={224}
+          loading="lazy"
+          decoding="async"
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           onError={handleImageError}
         />
@@ -86,11 +93,12 @@ export function TourCard({
           {tour.difficulty}
         </span>
 
-        <div className="absolute right-3 top-3 rounded-full bg-teal-600 px-3 py-1 text-sm font-bold text-white shadow">
+        {/* سعر الرحلة مع خلفية teal-700 لتحقيق أعلى معايير تباين الألوان (Accessibility) */}
+        <div className="absolute right-3 top-3 rounded-full bg-teal-700 px-3 py-1 text-sm font-bold text-white shadow">
           ${tour.price}
         </div>
 
-        <div className="absolute bottom-3 left-4 flex items-center gap-1 rounded-full bg-black/50 px-2.5 py-1 backdrop-blur-sm">
+        <div className="absolute bottom-3 left-4 flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 backdrop-blur-sm">
           <svg
             className="h-3.5 w-3.5 text-amber-400"
             fill="currentColor"
@@ -104,7 +112,7 @@ export function TourCard({
             {Number(tour.ratingsAverage ?? 0).toFixed(1)}
           </span>
 
-          <span className="text-xs text-white/70">
+          <span className="text-xs text-white/80">
             ({tour.ratingsQuantity ?? 0})
           </span>
         </div>
@@ -113,9 +121,10 @@ export function TourCard({
       {/* Card body */}
       <div className="flex flex-1 flex-col gap-4 p-5">
         <div>
-          <h3 className="mb-1.5 line-clamp-2 text-lg font-extrabold leading-snug text-slate-800 dark:text-white">
+          {/* تحويل العنوان إلى h2 لسلامة التسلسل الهيكلي للعناوين وتجنب أخطاء SEO و Accessibility */}
+          <h2 className="mb-1.5 line-clamp-2 text-lg font-extrabold leading-snug text-slate-800 dark:text-white">
             {tour.name}
-          </h3>
+          </h2>
 
           {tour.startLocation?.description && (
             <p className="flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -142,38 +151,33 @@ export function TourCard({
             </p>
           )}
 
+          {(distance ?? tour.distance) !== undefined && (
+            <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-teal-700 dark:text-teal-400">
+              <svg
+                className="h-3.5 w-3.5 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 21s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"
+                />
+              </svg>
 
-
-
-{(distance ?? tour.distance) !== undefined && (
-  <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-teal-600 dark:text-teal-400">
-    <svg
-      className="h-3.5 w-3.5 shrink-0"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden="true"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 21s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Z"
-      />
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"
-      />
-    </svg>
-
-    <span>
-      {formatDistance((distance ?? tour.distance)!, distanceUnit)}
-    </span>
-  </p>
-)}
-
-
+              <span>
+                {formatDistance((distance ?? tour.distance)!, distanceUnit)}
+              </span>
+            </p>
+          )}
         </div>
 
         <p className="line-clamp-2 flex-1 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
@@ -183,7 +187,7 @@ export function TourCard({
         <div className="flex items-center gap-4 border-t border-slate-100 pt-3 dark:border-slate-700">
           <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
             <svg
-              className="h-4 w-4 text-teal-500"
+              className="h-4 w-4 text-teal-600 dark:text-teal-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -206,7 +210,7 @@ export function TourCard({
 
           <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
             <svg
-              className="h-4 w-4 text-teal-500"
+              className="h-4 w-4 text-teal-600 dark:text-teal-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -228,11 +232,12 @@ export function TourCard({
           </div>
         </div>
 
+        {/* استخدام bg-teal-700 لتباين ألوان مثالي متوافق مع معايير WCAG */}
         <Link
           to={`/tours/${tour.slug}`}
-          className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-teal-700 hover:shadow-md active:scale-95"
+          className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-teal-800 hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
         >
-         View Details
+          View Details
           <svg
             className="h-4 w-4"
             fill="none"
