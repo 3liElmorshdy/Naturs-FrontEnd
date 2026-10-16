@@ -34,9 +34,6 @@ export function useAdminBookings() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdatingId, setIsUpdatingId] = useState<string | null>(null);
 
-  // Manual create modal visibility
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
   // Fetch all bookings from backend
   const fetchBookings = useCallback(async () => {
     setIsLoading(true);
@@ -187,10 +184,9 @@ export function useAdminBookings() {
     setBookingToDelete,
     isDeleting,
     isUpdatingId,
-    isCreateModalOpen,
-    setIsCreateModalOpen,
     fetchBookings,
     handleTogglePaidStatus,
     handleDeleteBooking,
   };
 }
+

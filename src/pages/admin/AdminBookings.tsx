@@ -1,7 +1,6 @@
 import {
   AlertCircle,
   ChevronLeft,
-  Plus,
   ReceiptText,
   RefreshCw,
 } from "lucide-react";
@@ -16,10 +15,10 @@ import {
   BookingSkeleton,
   BookingStats,
   BookingTable,
-  CreateBookingModal,
   DeleteBookingModal,
 } from "./AdminBookings/components";
 import { useAdminBookings } from "./AdminBookings/hooks";
+
 
 export function AdminBookings() {
   const {
@@ -43,8 +42,6 @@ export function AdminBookings() {
     setBookingToDelete,
     isDeleting,
     isUpdatingId,
-    isCreateModalOpen,
-    setIsCreateModalOpen,
     fetchBookings,
     handleTogglePaidStatus,
     handleDeleteBooking,
@@ -95,18 +92,9 @@ export function AdminBookings() {
               />
               <span>Refresh</span>
             </button>
-
-            {/* Create Booking Button */}
-            <button
-              type="button"
-              onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700 active:scale-95"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Create Booking</span>
-            </button>
           </div>
         </header>
+
 
         {/* ── KPI Summary Cards ── */}
         <BookingStats stats={stats} />
@@ -193,14 +181,9 @@ export function AdminBookings() {
         onCancel={() => setBookingToDelete(null)}
         onConfirm={() => void handleDeleteBooking()}
       />
-
-      <CreateBookingModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSuccess={() => void fetchBookings()}
-      />
     </main>
   );
 }
 
 export default AdminBookings;
+
