@@ -145,12 +145,12 @@ export function TourFilters({
                 setDifficulty(event.target.value);
               }}
               aria-label="Filter by difficulty"
-              className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:ring-2 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className="cursor-pointer rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:ring-2 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 [color-scheme:light] dark:[color-scheme:dark]"
             >
-              <option value="all">All difficulties</option>
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="difficult">Difficult</option>
+              <option value="all" className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100">All difficulties</option>
+              <option value="easy" className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100">Easy</option>
+              <option value="medium" className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100">Medium</option>
+              <option value="difficult" className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100">Difficult</option>
             </select>
 
             {/* Rating */}
@@ -160,11 +160,11 @@ export function TourFilters({
                 setMinRating(Number(event.target.value));
               }}
               aria-label="Filter by minimum rating"
-              className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:ring-2 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className="cursor-pointer rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:ring-2 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 [color-scheme:light] dark:[color-scheme:dark]"
             >
-              <option value={0}>Any rating</option>
-              <option value={4}>4★ & up</option>
-              <option value={4.5}>4.5★ & up</option>
+              <option value={0} className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100">Any rating</option>
+              <option value={4} className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100">4★ & up</option>
+              <option value={4.5} className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100">4.5★ & up</option>
             </select>
 
             {/* Sort */}
@@ -174,22 +174,23 @@ export function TourFilters({
                 setSortBy(event.target.value);
               }}
               aria-label="Sort tours"
-              className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:ring-2 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className="cursor-pointer rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:ring-2 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 [color-scheme:light] dark:[color-scheme:dark]"
             >
-              <option value="price-asc">
+              <option value="price-asc" className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100">
                 Price: Low → High
               </option>
 
-              <option value="price-desc">
+              <option value="price-desc" className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100">
                 Price: High → Low
               </option>
 
-              <option value="rating">Top Rated</option>
+              <option value="rating" className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100">Top Rated</option>
 
-              <option value="duration">
+              <option value="duration" className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100">
                 Shortest First
               </option>
             </select>
+
 
             {/* Result count + clear */}
             <div className="ml-auto flex items-center gap-3">

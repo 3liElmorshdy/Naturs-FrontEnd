@@ -110,20 +110,41 @@ export function BookingFilterToolbar({
         </div>
 
         {/* Sort Selector */}
-        <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold dark:border-slate-800 dark:bg-slate-900">
-          <ArrowUpDown className="h-3.5 w-3.5 text-slate-400" />
+        <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold shadow-sm transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
+          <ArrowUpDown className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
           <select
             value={sortBy}
             onChange={(e) => onSortChange(e.target.value as BookingSortOption)}
-            className="bg-transparent text-slate-700 focus:outline-none dark:text-slate-200"
+            className="cursor-pointer bg-transparent text-slate-700 focus:outline-none dark:bg-slate-900 dark:text-slate-200 [color-scheme:light] dark:[color-scheme:dark]"
             aria-label="Sort bookings"
           >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="price-desc">Price: High to Low</option>
-            <option value="price-asc">Price: Low to High</option>
+            <option
+              value="newest"
+              className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100"
+            >
+              Newest First
+            </option>
+            <option
+              value="oldest"
+              className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100"
+            >
+              Oldest First
+            </option>
+            <option
+              value="price-desc"
+              className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100"
+            >
+              Price: High to Low
+            </option>
+            <option
+              value="price-asc"
+              className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100"
+            >
+              Price: Low to High
+            </option>
           </select>
         </div>
+
 
         {/* View Mode Toggle (Table / Grid) */}
         <div
