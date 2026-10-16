@@ -33,7 +33,7 @@ export function NavBar() {
 
   function desktopLinkClassName({ isActive }: { isActive: boolean }) {
     return [
-      "border-b-2 py-5 text-sm font-semibold transition-colors",
+      "border-b-2 py-2 text-sm font-semibold transition-colors",
       isActive
         ? "border-teal-600 text-teal-600 dark:border-teal-400 dark:text-teal-400"
         : "border-transparent text-slate-600 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400",
@@ -49,7 +49,7 @@ export function NavBar() {
             <Logo />
 
             <nav
-              className="hidden items-center gap-5 xl:gap-7 lg:flex"
+              className="hidden items-center gap-6 xl:gap-10 lg:flex"
               aria-label="Primary navigation"
             >
               <NavLink to="/" end className={desktopLinkClassName}>
@@ -96,7 +96,7 @@ export function NavBar() {
               >
                 <Heart className="h-5 w-5" />
                 {wishlistCount > 0 && (
-                  <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-slate-900">
+                  <span className="absolute right-0 top-0 flex h-5 min-w-5 translate-x-1/3 -translate-y-1/3 items-center justify-center rounded-full bg-rose-600 px-1 text-[11px] font-bold leading-none text-white shadow-sm ring-2 ring-white dark:ring-slate-900">
                     {wishlistCount}
                   </span>
                 )}

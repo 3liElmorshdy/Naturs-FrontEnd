@@ -124,17 +124,17 @@ export function TourCard({
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
 
         <span
-          className={`absolute left-3 top-3 rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize shadow-sm ${diffColor}`}
+          className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-semibold capitalize shadow-sm ${diffColor}`}
         >
           {tour.difficulty}
         </span>
 
         {/* سعر الرحلة مع خلفية teal-700 لتحقيق أعلى معايير تباين الألوان */}
-        <div className="absolute right-3 top-3 rounded-full bg-teal-700 px-3 py-1 text-sm font-bold text-white shadow">
+        <div className="absolute right-4 top-4 rounded-full bg-teal-700 px-3 py-1 text-sm font-bold text-white shadow">
           ${tour.price}
         </div>
 
-        <div className="absolute bottom-3 left-4 flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 backdrop-blur-sm">
+        <div className="absolute bottom-4 left-4 flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 backdrop-blur-sm">
           <svg
             className="h-3.5 w-3.5 text-amber-400"
             fill="currentColor"
@@ -155,16 +155,16 @@ export function TourCard({
       </div>
 
       {/* Card body */}
-      <div className="flex flex-1 flex-col gap-4 p-5">
+      <div className="flex flex-1 flex-col gap-4 p-6">
         <div>
           <h2 className="mb-1.5 line-clamp-2 text-lg font-extrabold leading-snug text-slate-800 dark:text-white">
             {tour.name}
           </h2>
 
           {tour.startLocation?.description && (
-            <p className="flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+            <p className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300">
               <svg
-                className="h-3.5 w-3.5 shrink-0"
+                className="h-4 w-4 shrink-0 text-teal-700 dark:text-teal-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -187,9 +187,9 @@ export function TourCard({
           )}
 
           {(distance ?? tour.distance) !== undefined && (
-            <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-teal-700 dark:text-teal-400">
+            <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-teal-700 dark:text-teal-400">
               <svg
-                className="h-3.5 w-3.5 shrink-0"
+                className="h-4 w-4 shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -215,12 +215,12 @@ export function TourCard({
           )}
         </div>
 
-        <p className="line-clamp-2 flex-1 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+        <p className="line-clamp-2 flex-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
           {tour.summary}
         </p>
 
         <div className="flex items-center gap-4 border-t border-slate-100 pt-3 dark:border-slate-700">
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-2 text-sm leading-none text-slate-600 dark:text-slate-300">
             <svg
               className="h-4 w-4 text-teal-600 dark:text-teal-400"
               fill="none"
@@ -243,7 +243,7 @@ export function TourCard({
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-2 text-sm leading-none text-slate-600 dark:text-slate-300">
             <svg
               className="h-4 w-4 text-teal-600 dark:text-teal-400"
               fill="none"
@@ -268,10 +268,10 @@ export function TourCard({
         </div>
 
         {/* CTA Section: View Details Button & Add to Wishlist Heart Button */}
-        <div className="mt-1 flex items-center gap-2">
+        <div className="mt-1 flex items-center gap-3">
           <Link
             to={`/tours/${tourSlug}`}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-teal-800 hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+            className="flex h-11 flex-1 items-center justify-center gap-2.5 rounded-xl bg-teal-700 px-4 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-teal-800 hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
           >
             <span>View Details</span>
             <svg
@@ -297,16 +297,16 @@ export function TourCard({
             disabled={isToggling}
             aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
             title={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-200 active:scale-90 focus:outline-none focus:ring-2 focus:ring-rose-500/50 ${
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border bg-white shadow-sm transition-all duration-200 active:scale-90 focus:outline-none focus:ring-2 focus:ring-rose-500/50 dark:bg-slate-800 ${
               isInWishlist
-                ? "border-rose-300 bg-rose-50 text-rose-600 shadow-sm hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-500/20 dark:text-rose-400 dark:hover:bg-rose-500/30"
-                : "border-slate-200 bg-white text-slate-400 shadow-sm hover:border-rose-300 hover:text-rose-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-rose-800 dark:hover:text-rose-400"
+                ? "border-rose-500 text-red-600 hover:bg-rose-50 dark:border-rose-500 dark:text-red-500 dark:hover:bg-slate-700"
+                : "border-slate-300 text-slate-500 hover:border-rose-400 hover:text-rose-600 dark:border-slate-600 dark:text-slate-400 dark:hover:border-rose-500 dark:hover:text-rose-400"
             }`}
           >
             <Heart
               className={`h-5 w-5 transition-transform duration-200 ${
                 isInWishlist
-                  ? "fill-rose-500 text-rose-500 scale-110"
+                  ? "fill-red-600 text-red-600 scale-110 dark:fill-red-500 dark:text-red-500"
                   : "hover:scale-110"
               } ${isToggling ? "animate-pulse" : ""}`}
             />
