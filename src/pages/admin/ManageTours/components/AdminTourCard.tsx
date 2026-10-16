@@ -25,8 +25,11 @@ export function AdminTourCard({
   onDeleteClick,
 }: AdminTourCardProps) {
   const coverUrl = tour.imageCover
-    ? `${API_ORIGIN}/img/tours/${tour.imageCover}`
+    ? tour.imageCover.startsWith("http")
+      ? tour.imageCover
+      : `${API_ORIGIN}/img/tours/${tour.imageCover}`
     : "";
+
 
   return (
     <article className="group relative flex flex-col justify-between rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-all hover:border-teal-200 hover:shadow-md dark:border-slate-800/80 dark:bg-slate-900 dark:hover:border-teal-500/30">

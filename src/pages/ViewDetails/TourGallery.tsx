@@ -1,4 +1,4 @@
-import { TOUR_IMG } from   "../../utils/viewDetails";
+import { getTourImageSrc } from "../../utils/viewDetails";
 
 interface TourGalleryProps {
   tourName: string;
@@ -28,11 +28,12 @@ export function TourGallery({
         {images.map((image, index) => (
           <img
             key={image}
-            src={`${TOUR_IMG}${image}`}
+            src={getTourImageSrc(image)}
             alt={`${tourName} photo ${index + 1}`}
             loading="lazy"
             decoding="async"
             className="h-48 w-full rounded-xl object-cover"
+
             onError={(event) => {
               event.currentTarget.onerror = null;
               event.currentTarget.src =

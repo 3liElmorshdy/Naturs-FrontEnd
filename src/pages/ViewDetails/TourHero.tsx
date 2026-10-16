@@ -1,5 +1,5 @@
 import type Tour from "../../types/Tour";
-import { TOUR_IMG, diffStyle } from "../../utils/viewDetails";
+import { getTourImageSrc, diffStyle } from "../../utils/viewDetails";
 
 interface TourHeroProps {
   tour: Tour;
@@ -10,10 +10,12 @@ export function TourHero({
   tour,
   tourId,
 }: TourHeroProps) {
+  const imageSrc = getTourImageSrc(tour.imageCover);
+
   return (
     <header className="relative h-72 sm:h-96">
       <img
-        src={`${TOUR_IMG}${tour.imageCover}`}
+        src={imageSrc}
         alt={tour.name}
         className="h-full w-full object-cover"
         onError={(event) => {
@@ -22,6 +24,7 @@ export function TourHero({
             `https://picsum.photos/seed/${tourId}/1600/700`;
         }}
       />
+
 
       <div
         className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"

@@ -1,26 +1,27 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import type Tour from "../../types/Tour";
 import { formatDistance } from "../../utils/formatDistance";
 import type { DistanceUnit } from "../../utils/formatDistance";
 import { API_ORIGIN as API_URL } from "../../config";
+
 const TOURS_IMAGE_BASE = `${API_URL}/img/tours/`;
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1000&q=80";
+
 interface TourCardProps {
   tour: Tour;
   distance?: number;
   distanceUnit?: DistanceUnit;
 }
 
-const getTourImageUrl = (imageCover?: string) => {
+export const getTourImageUrl = (imageCover?: string) => {
   if (!imageCover) {
-    return "https://picsum.photos/seed/default-tour/600/400";
+    return FALLBACK_IMAGE;
   }
 
-  // لو الـ backend رجّع URL كامل
-  if (
-    imageCover.startsWith("http://") ||
-    imageCover.startsWith("https://")
-  ) {
+  // Cloudinary أو أي رابط خارجي كامل
+  if (imageCover.startsWith("http://") || imageCover.startsWith("https://")) {
     return imageCover;
   }
 
@@ -32,33 +33,39 @@ const getTourImageUrl = (imageCover?: string) => {
   // لو الـ backend رجّع tour-1-cover.jpg
   return `${TOURS_IMAGE_BASE}${imageCover}`;
 };
+
 export function TourCard({
   tour,
   distance,
   distanceUnit = "mi",
-}: TourCardProps) 
-
-
-{ const [imageSrc, setImageSrc] = useState(() =>
+}: TourCardProps) {
+  const [imageSrc, setImageSrc] = useState(() =>
     getTourImageUrl(tour.imageCover),
   );
 
-  const diffColor = {
-    easy: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-    medium:
-      "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-    difficult:
-      "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
-  }[tour.difficulty];
+  // تحديث الصورة عند تغير بيانات الرحلة
+  useEffect(() => {
+    setImageSrc(getTourImageUrl(tour.imageCover));
+  }, [tour.imageCover, tour._id]);
+
+  const difficultyKey = tour.difficulty || "easy";
+  const diffColor =
+    {
+      easy: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+      medium:
+        "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+      difficult:
+        "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
+    }[difficultyKey] ||
+    "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300";
 
   const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
-    const fallbackImage = `https://picsum.photos/seed/${tour._id}/600/400`;
-
-    // يمنع محاولة تحميل fallback بلا نهاية لو فشلت هي كمان.
-    if (event.currentTarget.src !== fallbackImage) {
-      setImageSrc(fallbackImage);
+    // يمنع محاولة تحميل fallback بلا نهاية لو فشلت هي كمان
+    if (event.currentTarget.src !== FALLBACK_IMAGE) {
+      setImageSrc(FALLBACK_IMAGE);
     }
   };
+
 
   return (
     <article className="group flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:ring-teal-400/50 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-teal-500/40">
