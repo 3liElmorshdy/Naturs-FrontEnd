@@ -243,10 +243,10 @@ export function MobileSidebar({
               <button
                 type="button"
                 onClick={installApp}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-600 px-4 py-3 text-sm font-bold text-white shadow-md hover:bg-teal-700 transition"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-teal-600/40 bg-teal-50/40 px-4 py-3 text-sm font-bold text-teal-700 transition hover:border-teal-600 hover:bg-teal-50 dark:border-teal-500/40 dark:bg-teal-500/10 dark:text-teal-300 dark:hover:border-teal-400 dark:hover:bg-teal-500/20"
               >
-                <Download className="h-4 w-4" />
-                <span>تثبيت التطبيق (Install App)</span>
+                <Download className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                <span>Install App</span>
               </button>
             )}
 
