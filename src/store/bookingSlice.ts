@@ -25,18 +25,9 @@ export const fetchMyBookings = createAsyncThunk<
   { rejectValue: string }
 >("bookings/fetchMyBookings", async (_, { rejectWithValue }) => {
   try {
-    let response;
+    // The backend route in bookingROut.js is /api/v1/bookings/my-bookings
+    const response = await api.get("/bookings/my-bookings");
 
-    try {
-      response = await api.get("/bookings/my-tours");
-    } catch (err: any) {
-      // Fallback in case backend route is /bookings/my-bookings
-      if (err.response?.status === 404) {
-        response = await api.get("/bookings/my-bookings");
-      } else {
-        throw err;
-      }
-    }
 
     // Support multiple backend response formats:
     // 1) { status: "success", data: { data: [...] } }
