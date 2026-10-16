@@ -46,29 +46,39 @@ export const fetchWishlist = createAsyncThunk<
   }
 });
 
+export type ToggleWishlistArg =
+  | Tour
+  | { tour: Tour; isCurrentlyInWishlist?: boolean };
+
 /**
  * Toggle tour in wishlist (optimistic update + server sync).
  */
 export const toggleWishlist = createAsyncThunk<
   { tourId: string; wasAdded: boolean; tour: Tour },
-  Tour,
+  ToggleWishlistArg,
   { rejectValue: { tourId: string; message: string; wasAdded: boolean } }
->("wishlist/toggleWishlist", async (tour, { getState, rejectWithValue }) => {
+>("wishlist/toggleWishlist", async (arg, { getState, rejectWithValue }) => {
   const state = getState() as { wishlist: WishlistState };
+  const tour = "tour" in arg ? arg.tour : arg;
   const tourId = tour._id;
-  const isCurrentlyInWishlist = state.wishlist.itemIds.includes(tourId);
+
+  // If explicitly passed from component, invert it (if not in wishlist -> add).
+  const shouldAdd =
+    "isCurrentlyInWishlist" in arg && arg.isCurrentlyInWishlist !== undefined
+      ? !arg.isCurrentlyInWishlist
+      : state.wishlist.itemIds.includes(tourId);
 
   try {
-    if (isCurrentlyInWishlist) {
-      // DELETE /api/v1/users/wishlist/:tourId
-      await api.delete(`/users/wishlist/${tourId}`);
-      toast.success("Removed from wishlist");
-      return { tourId, wasAdded: false, tour };
-    } else {
+    if (shouldAdd) {
       // POST /api/v1/users/wishlist/:tourId
       await api.post(`/users/wishlist/${tourId}`);
       toast.success("Added to wishlist ❤️");
       return { tourId, wasAdded: true, tour };
+    } else {
+      // DELETE /api/v1/users/wishlist/:tourId
+      await api.delete(`/users/wishlist/${tourId}`);
+      toast.success("Removed from wishlist");
+      return { tourId, wasAdded: false, tour };
     }
   } catch (error: any) {
     const message =
@@ -79,7 +89,7 @@ export const toggleWishlist = createAsyncThunk<
     return rejectWithValue({
       tourId,
       message,
-      wasAdded: !isCurrentlyInWishlist,
+      wasAdded: shouldAdd,
     });
   }
 });
@@ -122,7 +132,8 @@ const wishlistSlice = createSlice({
     // Toggle Wishlist - Optimistic update in pending
     builder
       .addCase(toggleWishlist.pending, (state, action) => {
-        const tour = action.meta.arg;
+        const arg = action.meta.arg;
+        const tour = "tour" in arg ? arg.tour : arg;
         const tourId = tour._id;
         state.togglingId = tourId;
 

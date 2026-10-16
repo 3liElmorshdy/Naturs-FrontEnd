@@ -90,7 +90,9 @@ export function TourCard({
       return;
     }
 
-    void dispatch(toggleWishlist(tour));
+    void dispatch(
+      toggleWishlist({ tour, isCurrentlyInWishlist: isInWishlist }),
+    );
   };
 
   return (
