@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { API_ORIGIN } from "../../config";
 
 export interface AvatarProps {
@@ -27,6 +27,11 @@ export function Avatar({
   const [imageError, setImageError] = useState(false);
 
   const rawImage = src || photo;
+
+  useEffect(() => {
+    setImageError(false);
+  }, [rawImage]);
+
   const isDefault = !rawImage || rawImage === "default.jpg" || imageError;
 
   const initials =
@@ -53,11 +58,14 @@ export function Avatar({
   }
 
   const photoUrl =
-    rawImage.startsWith("http") ||
+    rawImage.startsWith("http://") ||
+    rawImage.startsWith("https://") ||
     rawImage.startsWith("data:") ||
     rawImage.startsWith("blob:")
       ? rawImage
-      : `${API_ORIGIN}/img/users/${rawImage}`;
+      : rawImage.startsWith("/")
+        ? `${API_ORIGIN}${rawImage}`
+        : `${API_ORIGIN}/img/users/${rawImage}`;
 
   return (
     <img
@@ -68,5 +76,6 @@ export function Avatar({
     />
   );
 }
+
 
 export default Avatar;

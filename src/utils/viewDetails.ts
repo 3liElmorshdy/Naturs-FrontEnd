@@ -11,6 +11,14 @@ export const getTourImageSrc = (img?: string): string => {
   return `${TOUR_IMG}${img}`;
 };
 
+export const getUserImageSrc = (img?: string): string => {
+  if (!img || img === "default.jpg") return "";
+  if (img.startsWith("http://") || img.startsWith("https://")) return img;
+  if (img.startsWith("/")) return `${API_URL}${img}`;
+  return `${USER_IMG}${img}`;
+};
+
+
 
 export const formatMonth = (date: string | Date) =>
   new Date(date).toLocaleDateString("en-US", {

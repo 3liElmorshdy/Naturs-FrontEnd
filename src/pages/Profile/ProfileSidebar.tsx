@@ -1,9 +1,7 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type User from "../../types/User";
 import { formatDate, getInitials } from "../../utils/profile";
 import { getUserPhotoUrl } from "../../utils/profile";
-
-
 
 interface ProfileSidebarProps {
   user: User;
@@ -14,14 +12,16 @@ export function ProfileSidebar({
   user,
   onImageChange,
 }: ProfileSidebarProps) {
+  const [hasImageError, setHasImageError] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    setHasImageError(false);
+  }, [user.photo]);
 
-    const [hasImageError, setHasImageError] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+  const photoUrl = getUserPhotoUrl(user.photo ?? "");
+  const showImage = Boolean(photoUrl) && !hasImageError;
 
-
-const photoUrl = getUserPhotoUrl(user.photo ?? "");
-const showImage = Boolean(photoUrl) && !hasImageError;
 
 
   const initials = getInitials(user.name || "User");

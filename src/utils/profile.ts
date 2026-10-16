@@ -35,16 +35,22 @@ export function formatDate(value?: string | Date, id?: string) {
 
 export function getUserPhotoUrl(
   photo?: string | null,
-) {
-  if (!photo) {
+): string | null {
+  if (!photo || photo === "default.jpg") {
     return null;
   }
 
   if (
     photo.startsWith("http://") ||
-    photo.startsWith("https://")
+    photo.startsWith("https://") ||
+    photo.startsWith("data:") ||
+    photo.startsWith("blob:")
   ) {
     return photo;
+  }
+
+  if (photo.startsWith("/")) {
+    return `${API_ORIGIN}${photo}`;
   }
 
   return `${API_ORIGIN}/img/users/${photo}`;
