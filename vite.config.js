@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+
+
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -10,6 +13,9 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        navigateFallbackDenylist: [/^\/api/, /^\/img/],
+      },
       includeAssets: ['favicon.svg', 'robots.txt', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
         name: 'Natours - Exciting Tours for Adventurous People',
@@ -78,4 +84,7 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 600,
   },
+
+
+
 });
