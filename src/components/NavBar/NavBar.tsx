@@ -8,6 +8,7 @@ import Logo from "../Logo/Logo";
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
 import UserAccountMenu from "./UserAccountMenu";
 import MobileSidebar from "./MobileSidebar";
+import InstallButton from "./InstallButton";
 
 import { useLogout } from "../../hooks/auth/useLogout";
 import type { RootState } from "../../store/store";
@@ -43,7 +44,7 @@ export function NavBar() {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/95">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between gap-6">
+        <div className="flex h-16 items-center justify-between gap-4 lg:gap-6">
           {/* Left: Brand Logo & Desktop Navigation */}
           <div className="flex min-w-0 items-center gap-4 xl:gap-8">
             <Logo />
@@ -78,8 +79,8 @@ export function NavBar() {
             </nav>
           </div>
 
-          {/* Right: Wishlist Icon / User Avatar / Theme Toggle & Mobile Hamburger */}
-          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          {/* Right: User Actions Area (Install, Wishlist, Account / Auth, Theme, Mobile Hamburger) */}
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3 lg:gap-4">
             {/* Wishlist Icon Button with Badge */}
             {user && (
               <NavLink
@@ -103,11 +104,14 @@ export function NavBar() {
               </NavLink>
             )}
 
+            {/* PWA Install Button (Strategically placed next to auth buttons / profile menu) */}
+            <InstallButton />
+
             {/* User Account Menu (Direct Link on Mobile/Tablet, Dropdown on Desktop) */}
             {user ? (
               <UserAccountMenu user={user} onLogout={handleLogout} />
             ) : (
-              <div className="hidden items-center gap-3 lg:flex">
+              <div className="hidden items-center gap-2.5 sm:gap-3 lg:flex">
                 <Button to="/login" variant="secondary">
                   Login
                 </Button>
