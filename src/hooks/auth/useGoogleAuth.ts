@@ -65,8 +65,8 @@ export const useGoogleAuth = () => {
         if (wasSignup) {
           toast.success(
             firstName
-              ? `Welcome to Natours, ${firstName}! Account created successfully.`
-              : 'Welcome to Natours! Your account was created with Google.',
+              ? `Welcome to Tejwal, ${firstName}! Account created successfully.`
+              : 'Welcome to Tejwal! Your account was created with Google.',
           );
         } else {
           toast.success(

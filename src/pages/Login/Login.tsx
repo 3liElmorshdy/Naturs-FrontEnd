@@ -171,7 +171,7 @@ const Login: React.FC = () => {
 
           <div className="mt-8 flex justify-between items-center border-t border-slate-200 pt-6 dark:border-slate-700">
             <p className="text-slate-600 text-sm dark:text-slate-400">
-              New to Natours?
+              New to Tejwal?
             </p>
             <Button
               to="/signup"

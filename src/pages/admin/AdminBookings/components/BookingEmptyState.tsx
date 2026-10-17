@@ -21,7 +21,7 @@ export function BookingEmptyState({
       <p className="mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
         {isFiltered
           ? "Try clearing or tweaking your search terms and filters."
-          : "When customers book tours on Natours, they will automatically appear here."}
+          : "When customers book tours on Tejwal, they will automatically appear here."}
       </p>
       {isFiltered && (
         <button

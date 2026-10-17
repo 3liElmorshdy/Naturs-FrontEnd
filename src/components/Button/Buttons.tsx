@@ -7,7 +7,7 @@ interface ButtonProps {
   to?: string;
   onClick?: () => void;
   type?: "button" | "submit" | "reset";
-  // إضافة كل الأنواع الجديدة لمشروع Natours
+  // إضافة كل الأنواع الجديدة لمشروع Tejwal
   variant?: "primary" | "secondary" | "outline" | "accent" | "danger" | "ghost";
   className?: string;
   disabled?: boolean; // مهمة جداً لتعطيل الزر أثناء التحميل

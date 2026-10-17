@@ -66,7 +66,7 @@ const Signup: React.FC = () => {
               Create Account
             </h2>
             <p className="text-sm mt-2 text-slate-500 dark:text-slate-400">
-              Join Natours and start your adventure!
+              Join Tejwal and start your adventure!
             </p>
 
             <form

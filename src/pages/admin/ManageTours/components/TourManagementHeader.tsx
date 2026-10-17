@@ -30,7 +30,7 @@ export function TourManagementHeader({
       ? isEditing
         ? `Update information and settings for "${editingTourName || "this tour"}".`
         : "Follow the 3-step setup to publish a new adventure to the catalog."
-      : "Browse, view, and manage all adventures in Natours.";
+      : "Browse, view, and manage all adventures in Tejwal.";
 
   return (
     <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">

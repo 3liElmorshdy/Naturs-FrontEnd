@@ -18,9 +18,9 @@ export default defineConfig({
       },
       includeAssets: ['favicon.svg', 'robots.txt', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
-        name: 'Natours - Exciting Tours for Adventurous People',
-        short_name: 'Natours',
-        description: 'Book your next awesome adventure with Natours',
+        name: 'Tejwal - Exciting Tours for Adventurous People',
+        short_name: 'Tejwal',
+        description: 'Book your next awesome adventure with Tejwal',
         theme_color: '#0d9488',
         background_color: '#0f172a',
         display: 'standalone',

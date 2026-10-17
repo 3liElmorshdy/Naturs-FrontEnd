@@ -32,7 +32,7 @@ const GoogleCallback = () => {
         {/* Informative Subtext */}
         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
           {isSignup
-            ? "Completing your Google sign up. Setting up your Natours profile…"
+            ? "Completing your Google sign up. Setting up your Tejwal profile…"
             : "Completing Google login. Connecting to your account…"}
         </p>
 

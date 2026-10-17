@@ -86,7 +86,7 @@ export function ExistingToursSection({
             No tours found in catalog.
           </p>
           <p className="mt-1 text-xs text-slate-400">
-            Start by creating the first tour for Natours.
+            Start by creating the first tour for Tejwal.
           </p>
           {onCreateClick && (
             <button

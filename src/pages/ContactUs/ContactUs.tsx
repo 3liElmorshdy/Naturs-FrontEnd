@@ -94,10 +94,10 @@ export function ContactUs() {
   return (
     <>
       <Helmet>
-        <title>Contact Us | Natours</title>
+        <title>Contact Us | Tejwal</title>
         <meta
           name="description"
-          content="Get in touch with Natours for bookings, tour questions, or support."
+          content="Get in touch with Tejwal for bookings, tour questions, or support."
         />
       </Helmet>
 
@@ -108,7 +108,7 @@ export function ContactUs() {
           </h1>
 
           <p className="mt-3 text-base text-slate-600 dark:text-slate-400">
-            Need help with a booking, a tour, or your Natours account?
+            Need help with a booking, a tour, or your Tejwal account?
             <br />
             Our support team is here to help.
           </p>
@@ -135,7 +135,7 @@ export function ContactUs() {
                   </h3>
 
                   <p className="mt-3 max-w-md leading-6">
-                    Have a question about a tour, booking, or your Natours
+                    Have a question about a tour, booking, or your Tejwal
                     account? Send us a message and our team will get back to
                     you as soon as possible.
                   </p>
@@ -404,7 +404,7 @@ export function ContactUs() {
 
         <footer className="mt-16 border-t border-slate-200 pt-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
           <p>
-            © {new Date().getFullYear()} Natours · Built by{" "}
+            © {new Date().getFullYear()} Tejwal · Built by{" "}
             <a
               href="https://www.linkedin.com/in/ali-elmorshedy-363877348/"
               target="_blank"

@@ -15,7 +15,7 @@ function AboutUs() {
         <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
           <p className="flex items-center gap-2 text-sm font-semibold text-teal-700 dark:text-teal-400">
             <MapPin className="h-4 w-4" />
-            ABOUT NATOURS
+            ABOUT TEJWAL
           </p>
 
           <div className="mt-5 max-w-3xl">
@@ -24,7 +24,7 @@ function AboutUs() {
             </h1>
 
             <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg dark:text-slate-300">
-              Natours is a simple way to find tours worth taking. We bring
+              Tejwal is a simple way to find tours worth taking. We bring
               together great places, trusted guides, and practical information
               so you can spend less time planning and more time enjoying the
               journey.
@@ -64,7 +64,7 @@ function AboutUs() {
           <div className="mt-6 space-y-4 text-base leading-7 text-slate-600 dark:text-slate-300">
             <p>
               There are countless places to visit, but finding a trip that
-              actually suits you can be difficult. Natours helps you explore
+              actually suits you can be difficult. Tejwal helps you explore
               well-organized tours without the noise, confusing details, or
               endless searching.
             </p>

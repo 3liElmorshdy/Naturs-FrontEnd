@@ -497,7 +497,7 @@ function AdminUsers() {
           </h1>
 
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            View, promote roles, and manage activation status for all registered Natours users.
+            View, promote roles, and manage activation status for all registered Tejwal users.
           </p>
         </div>
 
