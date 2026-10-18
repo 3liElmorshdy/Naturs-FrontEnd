@@ -1,5 +1,6 @@
 import { API_ORIGIN } from "../../config";
 import React, { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   Check,
@@ -189,13 +190,39 @@ function AdminUsers() {
     (state: RootState) => state.auth.user,
   );
 
-  const [users, setUsers] = useState<User[]>([]);
+  const queryClient = useQueryClient();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const canAccessPage = currentUser?.role === "admin";
+
+  const {
+    data: fetchedUsers = [],
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["admin", "users"],
+    queryFn: async () => {
+      const { users: loadedUsers } = await getAllUsers();
+      return loadedUsers;
+    },
+    enabled: canAccessPage,
+  });
+
+  const [localUsers, setLocalUsers] = useState<User[] | null>(null);
+  const users = localUsers ?? fetchedUsers;
+
+  const setUsers: React.Dispatch<React.SetStateAction<User[]>> = (action) => {
+    setLocalUsers((prev) => {
+      const current = prev ?? fetchedUsers;
+      const next = typeof action === "function" ? action(current) : action;
+      queryClient.setQueryData(["admin", "users"], next);
+      return next;
+    });
+  };
 
   // Delete modal state
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
@@ -218,26 +245,12 @@ function AdminUsers() {
   // Tracking user currently toggling active status
   const [togglingUserId, setTogglingUserId] = useState<string | null>(null);
 
-  const canAccessPage = currentUser?.role === "admin";
+  const isRefreshing = isFetching && !isLoading;
+  const errorMessage = error ? getRequestErrorMessage(error) : "";
 
-  async function loadUsers(showRefreshState = false) {
-    if (showRefreshState) {
-      setIsRefreshing(true);
-    } else {
-      setIsLoading(true);
-    }
-
-    setErrorMessage("");
-
-    try {
-      const { users: loadedUsers } = await getAllUsers();
-      setUsers(loadedUsers);
-    } catch (error) {
-      setErrorMessage(getRequestErrorMessage(error));
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
+  async function loadUsers(_showRefreshState = false) {
+    setLocalUsers(null);
+    await refetch();
   }
 
   async function handleViewUser(userId: string) {
@@ -425,14 +438,6 @@ function AdminUsers() {
     setUserToDelete(null);
     setDeleteError("");
   }
-
-  useEffect(() => {
-    if (!canAccessPage) {
-      return;
-    }
-
-    void loadUsers();
-  }, [canAccessPage]);
 
   useEffect(() => {
     setCurrentPage(1);

@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { CheckCircle2, Loader, XCircle } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 import api from "../../services/api";
 import { updateUser } from "../../store/authSlice";
@@ -17,46 +17,37 @@ function ConfirmEmailChange() {
     Boolean(state.auth.user),
   );
 
-  const hasRun = useRef(false);
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["confirmEmailChange", token],
+    queryFn: async () => {
+      if (!token) {
+        throw new Error("This confirmation link is invalid.");
+      }
+      const response = await api.patch(`/users/confirmEmailChange/${token}`);
+      if (isLoggedIn && response.data?.data?.user) {
+        dispatch(updateUser(response.data.data.user));
+      }
+      return response.data;
+    },
+    enabled: Boolean(token),
+    retry: false,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
+  });
 
-  const [status, setStatus] = useState<Status>("loading");
-  const [message, setMessage] = useState("");
+  const status: Status = !token
+    ? "error"
+    : isLoading
+      ? "loading"
+      : isError
+        ? "error"
+        : "success";
 
-  useEffect(() => {
-    /*
-      StrictMode في وضع التطوير بيشغّل الـ effect مرتين.
-      التوكن بيتستهلك من أول طلب، فالطلب التاني هيفشل.
-      الـ ref بيمنع الطلب المكرر.
-    */
-    if (hasRun.current) {
-      return;
-    }
-
-    hasRun.current = true;
-
-    if (!token) {
-      setMessage("This confirmation link is invalid.");
-      setStatus("error");
-      return;
-    }
-
-    api
-      .patch(`/users/confirmEmailChange/${token}`)
-      .then((response) => {
-        if (isLoggedIn) {
-          dispatch(updateUser(response.data.data.user));
-        }
-
-        setMessage(
-          response.data.message ?? "Your email address has been updated.",
-        );
-        setStatus("success");
-      })
-      .catch((error) => {
-        setMessage(getRequestErrorMessage(error));
-        setStatus("error");
-      });
-  }, [token, isLoggedIn, dispatch]);
+  const message = !token
+    ? "This confirmation link is invalid."
+    : isError
+      ? getRequestErrorMessage(error)
+      : (data?.message ?? "Your email address has been updated.");
 
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-md items-center justify-center p-4">

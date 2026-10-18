@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { getTourGuides } from "../../../../services/adminUsers";
 import { getAllTours } from "../../../../services/tourApi";
@@ -15,53 +16,49 @@ export function useManageToursData({
   enabled,
   onError,
 }: UseManageToursDataParams) {
-  const [guides, setGuides] = useState<User[]>([]);
-  const [isLoadingGuides, setIsLoadingGuides] = useState(true);
-
-  const [tours, setTours] = useState<Tour[]>([]);
-  const [isLoadingTours, setIsLoadingTours] = useState(true);
-
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
-    async function loadGuides() {
-      setIsLoadingGuides(true);
-
+  const {
+    data: guides = [],
+    isLoading: isLoadingGuides,
+  } = useQuery({
+    queryKey: ["admin", "tourGuides"],
+    queryFn: async () => {
       try {
-        const loadedGuides = await getTourGuides();
-        setGuides(loadedGuides);
+        return await getTourGuides();
       } catch (error) {
         onError(getRequestErrorMessage(error));
-      } finally {
-        setIsLoadingGuides(false);
+        throw error;
       }
-    }
+    },
+    enabled,
+  });
 
-    void loadGuides();
-  }, [enabled, onError]);
+  // Local state for tours so ManageTours can perform immediate optimistic updates via setTours
+  const [localTours, setLocalTours] = useState<Tour[] | null>(null);
 
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
-    async function loadTours() {
-      setIsLoadingTours(true);
-
+  const {
+    data: fetchedTours = [],
+    isLoading: isLoadingTours,
+  } = useQuery({
+    queryKey: ["admin", "tours"],
+    queryFn: async () => {
       try {
-        const loadedTours = await getAllTours();
-        setTours(loadedTours);
+        return await getAllTours();
       } catch (error) {
         onError(getRequestErrorMessage(error));
-      } finally {
-        setIsLoadingTours(false);
+        throw error;
       }
-    }
+    },
+    enabled,
+  });
 
-    void loadTours();
-  }, [enabled, onError]);
+  const tours = localTours ?? fetchedTours;
+
+  const setTours: React.Dispatch<React.SetStateAction<Tour[]>> = (action) => {
+    setLocalTours((prev) => {
+      const current = prev ?? fetchedTours;
+      return typeof action === "function" ? action(current) : action;
+    });
+  };
 
   return {
     guides,

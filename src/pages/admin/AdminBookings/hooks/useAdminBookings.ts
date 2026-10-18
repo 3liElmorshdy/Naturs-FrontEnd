@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 import {
@@ -17,9 +18,7 @@ import type {
 import { extractCustomer, formatCurrency } from "../utils";
 
 export function useAdminBookings() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
+  const queryClient = useQueryClient();
 
   // Filters, sorting, and layout mode
   const [searchQuery, setSearchQuery] = useState("");
@@ -34,24 +33,22 @@ export function useAdminBookings() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdatingId, setIsUpdatingId] = useState<string | null>(null);
 
-  // Fetch all bookings from backend
+  // Fetch all bookings from backend via React Query
+  const {
+    data: bookings = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["admin", "bookings"],
+    queryFn: ({ signal }) => getAllBookings(signal),
+  });
+
+  const errorMessage = error ? getBookingErrorMessage(error) : "";
+
   const fetchBookings = useCallback(async () => {
-    setIsLoading(true);
-    setErrorMessage("");
-
-    try {
-      const data = await getAllBookings();
-      setBookings(data);
-    } catch (error) {
-      setErrorMessage(getBookingErrorMessage(error));
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void fetchBookings();
-  }, [fetchBookings]);
+    await refetch();
+  }, [refetch]);
 
   // Aggregate KPI stats
   const stats: BookingStatsData = useMemo(() => {
@@ -125,7 +122,7 @@ export function useAdminBookings() {
       const updated = await updateBooking(booking._id, {
         paid: newPaidStatus,
       });
-      setBookings((prev) =>
+      queryClient.setQueryData<Booking[]>(["admin", "bookings"], (prev = []) =>
         prev.map((b) =>
           b._id === booking._id ? { ...b, paid: updated.paid } : b,
         ),
@@ -135,8 +132,8 @@ export function useAdminBookings() {
           ? `Booking marked as Paid (${formatCurrency(booking.price)})`
           : "Booking marked as Payment Pending",
       );
-    } catch (error) {
-      toast.error(getBookingErrorMessage(error));
+    } catch (err) {
+      toast.error(getBookingErrorMessage(err));
     } finally {
       setIsUpdatingId(null);
     }
@@ -149,13 +146,13 @@ export function useAdminBookings() {
 
     try {
       await deleteBooking(bookingToDelete._id);
-      setBookings((prev) =>
+      queryClient.setQueryData<Booking[]>(["admin", "bookings"], (prev = []) =>
         prev.filter((b) => b._id !== bookingToDelete._id),
       );
       toast.success("Booking deleted successfully");
       setBookingToDelete(null);
-    } catch (error) {
-      toast.error(getBookingErrorMessage(error));
+    } catch (err) {
+      toast.error(getBookingErrorMessage(err));
     } finally {
       setIsDeleting(false);
     }
@@ -189,4 +186,3 @@ export function useAdminBookings() {
     handleDeleteBooking,
   };
 }
-

@@ -1,6 +1,4 @@
-import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 import {
   AlertCircle,
   Compass,
@@ -10,8 +8,8 @@ import {
 } from "lucide-react";
 
 import { TourCard } from "../../components/TourCard/TourCard";
-import { fetchMyBookings } from "../../store/bookingSlice";
-import type { AppDispatch, RootState } from "../../store/store";
+import { useMyBookings } from "../../hooks/Booking/useMyBookings";
+import { getRequestErrorMessage } from "../../utils/requestError";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    COMPONENT: BookingsSkeleton
@@ -94,18 +92,13 @@ export function EmptyBookingsState() {
    MAIN PAGE: MyBookings
    ───────────────────────────────────────────────────────────────────────────── */
 export function MyBookings() {
-  const dispatch = useDispatch<AppDispatch>();
-  const { tours, isLoading, error } = useSelector(
-    (state: RootState) => state.bookings,
-  );
-
-  useEffect(() => {
-    void dispatch(fetchMyBookings());
-  }, [dispatch]);
+  const { data: tours = [], isLoading, error, refetch } = useMyBookings();
 
   const handleRefresh = () => {
-    void dispatch(fetchMyBookings());
+    void refetch();
   };
+
+  const errorMessage = error ? getRequestErrorMessage(error) : null;
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100 sm:px-6 lg:px-8">
@@ -154,7 +147,7 @@ export function MyBookings() {
         </header>
 
         {/* ── Error Banner ── */}
-        {error && (
+        {errorMessage && (
           <div
             role="alert"
             className="mb-8 flex items-start justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 shadow-sm dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300"
@@ -164,7 +157,7 @@ export function MyBookings() {
               <div>
                 <p className="font-bold">Failed to load bookings</p>
                 <p className="mt-0.5 text-xs text-rose-600 dark:text-rose-400">
-                  {error}
+                  {errorMessage}
                 </p>
               </div>
             </div>

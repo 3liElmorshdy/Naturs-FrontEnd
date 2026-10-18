@@ -7,9 +7,10 @@ import {
   RefreshCw,
   TrendingUp,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 import type { RootState } from "../../../store/store";
 import { getMonthlyPlan } from "../../../services/monthlyPlan";
@@ -40,44 +41,25 @@ function MonthlyPlan() {
     new Date().getFullYear(),
   );
 
-  const [plan, setPlan] = useState<MonthlyPlanItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-
   const canAccessPage =
     currentUser?.role === "admin" ||
     currentUser?.role === "lead-guide" ||
     currentUser?.role === "guide";
 
-  async function loadPlan(showRefreshState = false) {
-    if (showRefreshState) {
-      setIsRefreshing(true);
-    } else {
-      setIsLoading(true);
-    }
+  const {
+    data: plan = [],
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["monthlyPlan", year],
+    queryFn: () => getMonthlyPlan(year),
+    enabled: canAccessPage,
+  });
 
-    setErrorMessage("");
-
-    try {
-      const loadedPlan = await getMonthlyPlan(year);
-
-      setPlan(loadedPlan);
-    } catch (error) {
-      setErrorMessage(getRequestErrorMessage(error));
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  }
-
-  useEffect(() => {
-    if (!canAccessPage) {
-      return;
-    }
-
-    void loadPlan();
-  }, [year, canAccessPage]);
+  const isRefreshing = isFetching && !isLoading;
+  const errorMessage = error ? getRequestErrorMessage(error) : "";
 
   const planByMonth = useMemo(() => {
     const months = Array.from(
@@ -171,7 +153,7 @@ function MonthlyPlan() {
 
             <button
               type="button"
-              onClick={() => void loadPlan(true)}
+              onClick={() => void refetch()}
               disabled={isLoading || isRefreshing}
               className="ml-2 flex h-10 w-10 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-600 transition hover:border-teal-400 hover:text-teal-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-teal-400 dark:hover:text-teal-300"
               aria-label="Refresh monthly plan"
@@ -202,7 +184,7 @@ function MonthlyPlan() {
 
               <button
                 type="button"
-                onClick={() => void loadPlan()}
+                onClick={() => void refetch()}
                 className="mt-3 font-semibold underline underline-offset-4"
               >
                 Try again
