@@ -48,10 +48,6 @@ export function BookingsSkeleton() {
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   COMPONENT: EmptyBookingsState
-   Friendly empty state when user has no booked tours
-   ───────────────────────────────────────────────────────────────────────────── */
 export function EmptyBookingsState() {
   return (
     <section
