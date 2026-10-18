@@ -43,13 +43,17 @@ The application is installable as a **Progressive Web App (PWA)** with responsiv
 
 <div align="center">
 
-| 🏕️ Home & Tour Discovery | 🧭 Immersive Tour Details |
+| 🏕️ Home & Tour Discovery (Light) | 🌙 Sleek Dark Mode Experience |
 |:---:|:---:|
-| ![Home Page](docs/screenshots/home.png) | ![Tour Details](docs/screenshots/tour-details.png) |
+| ![Home Page](docs/screenshots/home.png) | ![Dark Mode](docs/screenshots/dark-mode.png) |
 
-| 🌙 Sleek Dark Mode | 🔐 Secure Authentication |
+| 🧭 Immersive Tour Details | ⭐ Traveler Reviews & Community |
 |:---:|:---:|
-| ![Dark Mode](docs/screenshots/dark-mode.png) | ![Login Screen](docs/screenshots/login.png) |
+| ![Tour Details](docs/screenshots/tour-details.png) | ![Tour Reviews](docs/screenshots/tour-reviews.png) |
+
+| 🗺️ Explore Adventures & Grid Filtering |
+|:---:|
+| ![Tour Catalog](docs/screenshots/tours-grid.png) |
 
 </div>
 
