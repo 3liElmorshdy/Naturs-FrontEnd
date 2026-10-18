@@ -68,7 +68,7 @@ You can create your own account instantly or sign in using Google. Alternatively
 
 | Role | Email | Password | Access Level |
 | :--- | :--- | :--- | :--- |
-| **Admin** | `admin@natours.io` | `test1234` | Full platform control, user management, tour wizard, analytics |
+| **Admin** | `admin@tajawal.io` | `test1234` | Full platform control, user management, tour wizard, analytics |
 | **Lead Guide** | `sophie@example.com` | `test1234` | Tour creation & editing, monthly plan review, guide bookings |
 | **Regular User** | `laura@example.com` | `test1234` | Tour booking, reviews, wishlist, personal profile |
 
