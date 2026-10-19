@@ -360,7 +360,7 @@ The backend is backed by an automated integration test suite utilizing `mongodb-
 **Ali Ahmed (3liElmorshdy)**
 - **GitHub:** [@3liElmorshdy](https://github.com/3liElmorshdy)
 - **LinkedIn:** [Ali Ahmed](https://www.linkedin.com/in/ali-elmorshedy-363877348/)
-- **Live Project:** [Tejwal Web App](https://naturs-front-end.vercel.app/)
+- **Live Project:** [Tejwal Web App](https://tejwal-front-end.vercel.app/)
 - **Email:** [alielmorshedy10@gmail.com](mailto:alielmorshedy10@gmail.com)
 
 ---
